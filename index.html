@@ -356,27 +356,22 @@ function TodayTab(){
   const [activeEx,setActiveEx]=useState(null);
   const [lastW,setLastW]=useState({});
   const [supps,setSupps]=useState(()=>lsGet("pf_supps_"+todayKey(),{}));
-  const [sleep,setSleep]=useState(()=>lsGet("pf_sleep_"+todayKey(),null));
   const [weekDone,setWeekDone]=useState(()=>lsGet("pf_week_"+todayKey().slice(0,7),{}));
   const [note,setNote]=useState(()=>lsGet("pf_note_"+todayKey(),""));
-  const [showWH,setShowWH]=useState(false);
   const [showBW,setShowBW]=useState(false);
 
   useEffect(()=>{lsSet("pf_split",splitIdx)},[splitIdx]);
   useEffect(()=>{lsSet("pf_rest_"+todayKey(),restDay)},[restDay]);
   useEffect(()=>{lsSet("pf_done_"+todayKey(),exDone)},[exDone]);
   useEffect(()=>{lsSet("pf_supps_"+todayKey(),supps)},[supps]);
-  useEffect(()=>{lsSet("pf_sleep_"+todayKey(),sleep)},[sleep]);
   useEffect(()=>{lsSet("pf_note_"+todayKey(),note)},[note]);
   useEffect(()=>{
     lsSet("pf_week_"+todayKey().slice(0,7),weekDone);
     const h=lsGet("pf_week_history",{});
     h[todayKey().slice(0,7)]=weekDone;
     lsSet("pf_week_history",h);
-    // Sync to calendar - directly use today's date key
     const cal=lsGet("pf_cal",{});
-    const isChecked=!!weekDone[todayShort];
-    if(isChecked){cal[todayKey()]=true;}
+    if(weekDone[todayShort]){cal[todayKey()]=true;}
     else{delete cal[todayKey()];}
     lsSet("pf_cal",cal);
   },[weekDone]);
@@ -385,9 +380,8 @@ function TodayTab(){
   const exs=WORKOUTS[DAYS[splitIdx]]||[];
   const doneCount=exs.filter(e=>exDone[e.id]).length;
   const suppCount=Object.values(supps).filter(Boolean).length;
-  const sleepDone=sleep?1:0;
-  const total=restDay?5:exs.length+4+1;
-  const done=restDay?suppCount+sleepDone:doneCount+suppCount+sleepDone;
+  const total=restDay?4:exs.length+4;
+  const done=restDay?suppCount:doneCount+suppCount;
   const pct=total>0?done/total:0;
   const ringCol=pct>=1?"#a3e635":pct>=.5?"#38bdf8":"#fb923c";
   const yp=getYearPct();
@@ -396,7 +390,9 @@ function TodayTab(){
   const streak=useMemo(()=>{
     const h=lsGet("pf_week_history",{});
     let s=0;
-    for(const wk of Object.keys(h).sort((a,b)=>b.localeCompare(a))){if(Object.values(h[wk]||{}).filter(Boolean).length>=3)s++;else break}
+    for(const wk of Object.keys(h).sort((a,b)=>b.localeCompare(a))){
+      if(Object.values(h[wk]||{}).filter(Boolean).length>=3)s++;else break;
+    }
     return s;
   },[weekDone]);
 
@@ -404,17 +400,16 @@ function TodayTab(){
     const w={};
     (WORKOUTS[DAYS[idx]]||[]).forEach(ex=>{
       const h=getExHist(ex.id).filter(x=>x.date!==todayKey());
-      if(h.length){const mx=Math.max(...h[0].sets.map(s=>parseFloat(s.weight)||0));if(mx>0)w[ex.id]=mx}
+      if(h.length){const mx=Math.max(...h[0].sets.map(s=>parseFloat(s.weight)||0));if(mx>0)w[ex.id]=mx;}
     });
     setLastW(w);
   }
   useEffect(()=>{loadLastW(splitIdx)},[splitIdx]);
 
-  const sleepOpts=[{k:"good",l:"Goed",e:"😴",c:"#a3e635"},{k:"ok",l:"Oké",e:"😐",c:"#fb923c"},{k:"bad",l:"Slecht",e:"😫",c:"#f87171"}];
-
   return(
     <div className="fu">
-      {/* Header */}
+
+      {/* Header ring */}
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:18,paddingTop:4}}>
         <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10}}>
           <Ring pct={pct} color={ringCol} size={108} stroke={9}/>
@@ -430,7 +425,7 @@ function TodayTab(){
         <div style={{display:"flex",gap:8,marginTop:10,alignItems:"center"}}>
           {streak>0&&<div style={{fontSize:10,color:"#fb923c",background:"#fb923c15",border:"1px solid #fb923c30",borderRadius:8,padding:"4px 10px"}}>🔥 {streak}w streak</div>}
           <button onClick={()=>setShowBW(true)} style={{border:"1px solid #2a2a2e",color:"#555",borderRadius:8,padding:"5px 11px",fontSize:11}}>
-            {bwHist[0]?`⚖️ ${bwHist[0].w}kg`:"⚖️ gewicht"}
+            {bwHist[0]?"⚖️ "+bwHist[0].w+"kg":"⚖️ gewicht"}
           </button>
         </div>
       </div>
@@ -439,7 +434,8 @@ function TodayTab(){
       <div className="card" style={{background:"linear-gradient(135deg,#141416,#1c1c20)"}}>
         <div style={{fontSize:12,color:"#e8e8e8",fontFamily:"'Syne',sans-serif",fontWeight:700,lineHeight:1.6,marginBottom:12,fontStyle:"italic"}}>"{getDailyQuote()}"</div>
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-          <div className="lbl">2026</div><div style={{fontSize:10,color:"#a3e635"}}>{yp}%</div>
+          <div className="lbl">2026</div>
+          <div style={{fontSize:10,color:"#a3e635"}}>{yp}%</div>
         </div>
         <div style={{height:3,background:"#1e1e22",borderRadius:2}}>
           <div style={{height:"100%",borderRadius:2,background:"linear-gradient(90deg,#a3e635,#38bdf8)",width:yp+"%"}}/>
@@ -456,24 +452,30 @@ function TodayTab(){
           <>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:col,letterSpacing:"-1px",marginBottom:12}}>{DAYS[splitIdx]}</div>
             <div style={{display:"flex",gap:6,marginBottom:14}}>
-              {DAYS.map((d,i)=><button key={d} onClick={()=>setSplitIdx(i)} style={{flex:1,padding:"7px 4px",borderRadius:10,background:i===splitIdx?DAY_COLORS[i]+"20":"#1a1a1e",border:`1px solid ${i===splitIdx?DAY_COLORS[i]+"60":"#2a2a2e"}`,color:i===splitIdx?DAY_COLORS[i]:"#444",fontSize:9,letterSpacing:".05em",textTransform:"uppercase",whiteSpace:"pre-line"}}>{d.replace(" ","\n")}</button>)}
+              {DAYS.map((d,i)=>(
+                <button key={d} onClick={()=>setSplitIdx(i)} style={{flex:1,padding:"7px 4px",borderRadius:10,background:i===splitIdx?DAY_COLORS[i]+"20":"#1a1a1e",border:"1px solid "+(i===splitIdx?DAY_COLORS[i]+"60":"#2a2a2e"),color:i===splitIdx?DAY_COLORS[i]:"#444",fontSize:9,letterSpacing:".05em",textTransform:"uppercase",whiteSpace:"pre-line"}}>{d.replace(" ","\n")}</button>
+              ))}
             </div>
             <div style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><div style={{fontSize:10,color:"#555"}}>voortgang</div><div style={{fontSize:10,color:doneCount===exs.length&&exs.length>0?col:"#555"}}>{doneCount}/{exs.length}</div></div>
-              <div style={{height:3,background:"#1e1e22",borderRadius:2}}><div style={{height:"100%",borderRadius:2,background:col,width:`${exs.length?(doneCount/exs.length)*100:0}%`,transition:"width .4s ease"}}/></div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                <div style={{fontSize:10,color:"#555"}}>voortgang</div>
+                <div style={{fontSize:10,color:doneCount===exs.length&&exs.length>0?col:"#555"}}>{doneCount}/{exs.length}</div>
+              </div>
+              <div style={{height:3,background:"#1e1e22",borderRadius:2}}>
+                <div style={{height:"100%",borderRadius:2,background:col,width:(exs.length?(doneCount/exs.length)*100:0)+"%",transition:"width .4s ease"}}/>
+              </div>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               {exs.map(ex=>{
                 const d=!!exDone[ex.id],lw=lastW[ex.id],pr=getPR(ex.id);
                 return(
-                  <div key={ex.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 11px",borderRadius:12,background:d?col+"08":"#0d0d0f",border:`1px solid ${d?col+"30":"#1e1e22"}`,transition:"all .15s"}}>
+                  <div key={ex.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 11px",borderRadius:12,background:d?col+"08":"#0d0d0f",border:"1px solid "+(d?col+"30":"#1e1e22"),transition:"all .15s"}}>
                     <div onClick={()=>{
                       const newDone={...exDone,[ex.id]:!exDone[ex.id]};
                       setExDone(newDone);
-                      // Auto-update week: uncheck today if no exercises done
                       const anyDone=Object.entries(newDone).some(([k,v])=>v&&exs.find(e=>e.id===k));
-                      if(!anyDone){setWeekDone(w=>{const u={...w,[todayShort]:false};return u});}
-                    }} style={{minWidth:20,height:20,borderRadius:6,border:`1.5px solid ${d?col:"#3a3a40"}`,background:d?col:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#000",fontWeight:700,flexShrink:0,cursor:"pointer"}}>{d?"✓":""}</div>
+                      if(!anyDone)setWeekDone(w=>({...w,[todayShort]:false}));
+                    }} style={{minWidth:20,height:20,borderRadius:6,border:"1.5px solid "+(d?col:"#3a3a40"),background:d?col:"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:"#000",fontWeight:700,flexShrink:0,cursor:"pointer"}}>{d?"✓":""}</div>
                     <div style={{flex:1,cursor:"pointer"}} onClick={()=>setActiveEx(ex)}>
                       <div style={{fontSize:12,color:d?"#555":"#e8e8e8",fontFamily:"'Syne',sans-serif",fontWeight:700,textDecoration:d?"line-through":"none"}}>
                         {ex.name}{pr>0&&getTodaySets(ex.id)&&<span style={{fontSize:9,color:"#fbbf24",marginLeft:4}}>🏆</span>}
@@ -483,7 +485,7 @@ function TodayTab(){
                         {lw&&<span style={{color:col+"90"}}> · {lw}kg</span>}
                       </div>
                     </div>
-                    <button onClick={()=>setActiveEx(ex)} style={{padding:"5px 10px",borderRadius:8,border:`1px solid ${col}35`,color:col+"cc",fontSize:10,flexShrink:0}}>log</button>
+                    <button onClick={()=>setActiveEx(ex)} style={{padding:"5px 10px",borderRadius:8,border:"1px solid "+col+"35",color:col+"cc",fontSize:10,flexShrink:0}}>log</button>
                   </div>
                 );
               })}
@@ -501,18 +503,7 @@ function TodayTab(){
         )}
       </div>
 
-          {WEEK.map(d=>{
-            const isT=d===todayShort,dn=weekDone[d];
-            return<div key={d} onClick={()=>setWeekDone(w=>({...w,[d]:!w[d]}))} style={{flex:1,aspectRatio:"1",borderRadius:10,background:dn?"#a3e63520":"#1a1a1e",border:`1px solid ${isT?"#a3e635":dn?"#a3e63540":"#2a2a2e"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",gap:3}}>
-              <div style={{fontSize:8,color:isT?"#a3e635":"#444"}}>{d}</div>
-              <div style={{fontSize:13}}>{dn?"✓":"·"}</div>
-            </div>;
-          })}
-        </div>
-      </div>
-
       <RestTimer/>
-
 
       {/* Supplementen */}
       <div className="card">
@@ -520,16 +511,18 @@ function TodayTab(){
         <div style={{display:"flex",flexDirection:"column",gap:7}}>
           {SUPPLEMENTS.map(s=>{
             const d=!!supps[s.id];
-            return<div key={s.id} onClick={()=>setSupps(p=>({...p,[s.id]:!p[s.id]}))} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 13px",borderRadius:12,background:d?"#a3e63508":"#0d0d0f",border:`1px solid ${d?"#a3e63530":"#1e1e22"}`,cursor:"pointer",transition:"all .15s"}}>
-              <div style={{display:"flex",alignItems:"center",gap:11}}>
-                <div style={{width:20,height:20,borderRadius:6,border:`1.5px solid ${d?"#a3e635":"#3a3a40"}`,background:d?"#a3e635":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#000"}}>{d?"✓":""}</div>
-                <div>
-                  <div style={{fontSize:12,color:d?"#e8e8e8":"#777",fontFamily:"'Syne',sans-serif",fontWeight:700}}>{s.label}</div>
-                  <div style={{fontSize:10,color:"#444"}}>{s.dose}</div>
+            return(
+              <div key={s.id} onClick={()=>setSupps(p=>({...p,[s.id]:!p[s.id]}))} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 13px",borderRadius:12,background:d?"#a3e63508":"#0d0d0f",border:"1px solid "+(d?"#a3e63530":"#1e1e22"),cursor:"pointer",transition:"all .15s"}}>
+                <div style={{display:"flex",alignItems:"center",gap:11}}>
+                  <div style={{width:20,height:20,borderRadius:6,border:"1.5px solid "+(d?"#a3e635":"#3a3a40"),background:d?"#a3e635":"transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:"#000"}}>{d?"✓":""}</div>
+                  <div>
+                    <div style={{fontSize:12,color:d?"#e8e8e8":"#777",fontFamily:"'Syne',sans-serif",fontWeight:700}}>{s.label}</div>
+                    <div style={{fontSize:10,color:"#444"}}>{s.dose}</div>
+                  </div>
                 </div>
+                <div style={{width:6,height:6,borderRadius:"50%",background:d?"#a3e635":"#2a2a2e"}}/>
               </div>
-              <div style={{width:6,height:6,borderRadius:"50%",background:d?"#a3e635":"#2a2a2e"}}/>
-            </div>;
+            );
           })}
         </div>
         <div style={{marginTop:10,padding:"8px 12px",borderRadius:10,background:"#0d0d0f",border:"1px solid #1e1e22"}}>
@@ -537,13 +530,11 @@ function TodayTab(){
         </div>
       </div>
 
-      {activeEx&&<ExModal ex={activeEx} dayColor={col} onClose={()=>{setActiveEx(null);loadLastW(splitIdx)}}/>}
-      {showWH&&<WeekHistModal onClose={()=>setShowWH(false)}/>}
+      {activeEx&&<ExModal ex={activeEx} dayColor={col} onClose={()=>{setActiveEx(null);loadLastW(splitIdx);}}/>}
       {showBW&&<BWModal onClose={()=>setShowBW(false)}/>}
     </div>
   );
 }
-
 // ─── STATS TAB ────────────────────────────────────────────────────────────────
 function StatsTab(){
   const [showBW,setShowBW]=useState(false);
