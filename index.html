@@ -19,11 +19,11 @@
     input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#a3e635}
     button{-webkit-tap-highlight-color:transparent;font-family:inherit;border:none;cursor:pointer;background:transparent}
     textarea{font-family:'DM Mono',monospace;resize:none;outline:none}
-    html,body{height:100%;overflow:hidden}
+    html,body{height:100%;margin:0;padding:0;overflow:hidden}
     #root{height:100%}
-    .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+    .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
     .page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 16px;padding-top:max(16px,env(safe-area-inset-top))}
-    .tabbar{flex-shrink:0;display:flex;background:#0d0d0f;border-top:1px solid #1e1e22;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+    .tabbar{flex-shrink:0;display:flex;background:#0d0d0f;border-top:1px solid #1e1e22;padding-bottom:0}
     .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 4px;gap:3px;cursor:pointer}
     .card{background:#111113;border:1px solid #1e1e22;border-radius:18px;padding:18px;margin-bottom:12px}
     .lbl{font-size:10px;color:#555;letter-spacing:.12em;text-transform:uppercase}
