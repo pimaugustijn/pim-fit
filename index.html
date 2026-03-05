@@ -501,13 +501,6 @@ function TodayTab(){
         )}
       </div>
 
-      {/* Week */}
-      <div className="card">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:11}}>
-          <div className="lbl">Week</div>
-          <button onClick={()=>setShowWH(true)} style={{border:"1px solid #2a2a2e",color:"#555",borderRadius:6,padding:"4px 10px",fontSize:10}}>geschiedenis</button>
-        </div>
-        <div style={{display:"flex",gap:5}}>
           {WEEK.map(d=>{
             const isT=d===todayShort,dn=weekDone[d];
             return<div key={d} onClick={()=>setWeekDone(w=>({...w,[d]:!w[d]}))} style={{flex:1,aspectRatio:"1",borderRadius:10,background:dn?"#a3e63520":"#1a1a1e",border:`1px solid ${isT?"#a3e635":dn?"#a3e63540":"#2a2a2e"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",gap:3}}>
@@ -520,16 +513,6 @@ function TodayTab(){
 
       <RestTimer/>
 
-      {/* Slaap */}
-      <div className="card">
-        <div className="lbl" style={{marginBottom:12}}>Slaap</div>
-        <div style={{display:"flex",gap:8}}>
-          {sleepOpts.map(o=><button key={o.k} onClick={()=>setSleep(p=>p===o.k?null:o.k)} style={{flex:1,padding:"13px 8px",borderRadius:12,background:sleep===o.k?o.c+"20":"#0d0d0f",border:`1px solid ${sleep===o.k?o.c+"60":"#1e1e22"}`,display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all .15s"}}>
-            <div style={{fontSize:20}}>{o.e}</div>
-            <div style={{fontSize:10,color:sleep===o.k?o.c:"#555"}}>{o.l}</div>
-          </button>)}
-        </div>
-      </div>
 
       {/* Supplementen */}
       <div className="card">
