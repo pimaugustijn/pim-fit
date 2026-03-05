@@ -167,22 +167,32 @@ function getDailyQuote(){
 let _actx=null;
 function getActx(){
   if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
-  if(_actx.state==="suspended")_actx.resume();
   return _actx;
+}
+// Play a silent buffer — required to unlock iOS audio on user gesture
+function unlockAudio(){
+  try{
+    const ctx=getActx();
+    const buf=ctx.createBuffer(1,1,22050);
+    const src=ctx.createBufferSource();
+    src.buffer=buf;src.connect(ctx.destination);src.start(0);
+    if(ctx.state==="suspended")ctx.resume();
+  }catch{}
 }
 function playBeep(){
   try{
     const ctx=getActx();
-    [0,180,360].forEach(delay=>{
+    if(ctx.state==="suspended")ctx.resume();
+    [0,0.2,0.4].forEach(delay=>{
       const o=ctx.createOscillator();
       const g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
       o.frequency.value=900;o.type="sine";
-      const t=ctx.currentTime+delay/1000;
+      const t=ctx.currentTime+delay;
       g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(0.4,t+0.01);
-      g.gain.linearRampToValueAtTime(0,t+0.22);
-      o.start(t);o.stop(t+0.25);
+      g.gain.linearRampToValueAtTime(0.5,t+0.01);
+      g.gain.linearRampToValueAtTime(0,t+0.18);
+      o.start(t);o.stop(t+0.2);
     });
   }catch{}
 }
@@ -403,7 +413,7 @@ function RestTimer(){
         <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
           <div style={{display:"flex",gap:8}}>
             {!running
-              ?<button onClick={()=>{try{getActx();}catch{}setDone(false);setRunning(true);}} style={{flex:1,padding:"10px 0",borderRadius:10,background:done?"#a3e63520":"#38bdf820",border:`1px solid ${done?"#a3e63550":"#38bdf850"}`,color:done?"#a3e635":"#38bdf8",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>{done?"Again":seconds===custom?"Start":"Resume"}</button>
+              ?<button onClick={()=>{unlockAudio();setDone(false);setRunning(true);}} style={{flex:1,padding:"10px 0",borderRadius:10,background:done?"#a3e63520":"#38bdf820",border:`1px solid ${done?"#a3e63550":"#38bdf850"}`,color:done?"#a3e635":"#38bdf8",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>{done?"Again":seconds===custom?"Start":"Resume"}</button>
               :<button onClick={()=>setRunning(false)} style={{flex:1,padding:"10px 0",borderRadius:10,background:"#fb923c20",border:"1px solid #fb923c50",color:"#fb923c",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Pause</button>
             }
             <button onClick={()=>{clearInterval(ref.current);setRunning(false);setDone(false);setSeconds(custom);}} style={{padding:"10px 14px",borderRadius:10,background:"transparent",border:"1px solid #2a2a2e",color:"#555",fontSize:12,cursor:"pointer"}}>↺</button>
@@ -569,18 +579,45 @@ function App(){
     <div style={{color:"#e8e8e8",fontFamily:"'DM Mono',monospace"}}>
 
       {/* ── HEADER ── */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20}}>
-        <div>
-          <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#fff",letterSpacing:"-0.5px"}}>Hey Pim 👋</div>
-          <div style={{color:"#555",fontSize:12,marginTop:3}}>{dayName} · {dateStr}</div>
-        </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {streak>0&&<div style={{fontSize:10,color:"#fb923c",background:"#fb923c15",border:"1px solid #fb923c30",borderRadius:8,padding:"4px 10px"}}>🔥 {streak}w streak</div>}
-          <button onClick={()=>setShowBodyWeight(true)} style={{background:"transparent",border:"1px solid #2a2a2e",color:"#555",borderRadius:8,padding:"6px 10px",fontSize:11,cursor:"pointer"}}>
-            {latestBW?`${latestBW.w}kg`:"gewicht"}
-          </button>
-        </div>
-      </div>
+      {(()=>{
+        const suppCount=Object.values(supps).filter(Boolean).length;
+        const suppTotal=4;
+        const sleepDone=sleepScore?1:0;
+        // Op rustdag tellen alleen supplementen + slaap mee
+        const totalItems=restDay?suppTotal+1:exercises.length+suppTotal+1;
+        const totalDone=restDay?suppCount+sleepDone:doneCount+suppCount+sleepDone;
+        const dayPct=totalItems>0?totalDone/totalItems:0;
+        const size=120,stroke=10,r=(size-stroke)/2,circ=2*Math.PI*r;
+        const ringColor=dayPct>=1?"#a3e635":dayPct>=0.5?"#38bdf8":"#fb923c";
+        return(
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:24,paddingTop:8}}>
+            <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14}}>
+              <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}>
+                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#1e1e22" strokeWidth={stroke}/>
+                <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={ringColor} strokeWidth={stroke}
+                  strokeDasharray={`${Math.min(dayPct,1)*circ} ${circ}`} strokeLinecap="round"
+                  style={{transition:"stroke-dasharray 0.8s cubic-bezier(.4,0,.2,1)"}}/>
+              </svg>
+              <div style={{position:"absolute",textAlign:"center"}}>
+                <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:ringColor,letterSpacing:"-2px",lineHeight:1}}>{Math.round(dayPct*100)}%</div>
+                <div style={{fontSize:9,color:"#555",letterSpacing:"0.1em",textTransform:"uppercase",marginTop:2}}>dag</div>
+              </div>
+            </div>
+            <div style={{textAlign:"center",marginBottom:4}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#fff",letterSpacing:"-0.5px"}}>
+                {dayPct>=1?"Dag voltooid 🏆":restDay?"Rustdag 💤":"Pim Augustijn"}
+              </div>
+              <div style={{color:"#555",fontSize:11,marginTop:3}}>{dayName} · {dateStr}</div>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center",marginTop:8}}>
+              {streak>0&&<div style={{fontSize:10,color:"#fb923c",background:"#fb923c15",border:"1px solid #fb923c30",borderRadius:8,padding:"4px 10px"}}>🔥 {streak}w streak</div>}
+              <button onClick={()=>setShowBodyWeight(true)} style={{background:"transparent",border:"1px solid #2a2a2e",color:"#555",borderRadius:8,padding:"5px 12px",fontSize:11,cursor:"pointer"}}>
+                {latestBW?`⚖️ ${latestBW.w}kg`:"⚖️ gewicht"}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── QUOTE + JAAR ── */}
       <div className="card" style={{background:"linear-gradient(135deg,#141416 0%,#1a1a1e 100%)"}}>
