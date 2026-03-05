@@ -19,11 +19,12 @@
     input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#a3e635}
     button{-webkit-tap-highlight-color:transparent;font-family:inherit;border:none;cursor:pointer;background:transparent}
     textarea{font-family:'DM Mono',monospace;resize:none;outline:none}
-    #root{height:100%;position:fixed;width:100%;top:0;left:0}
-    .app-shell{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto}
-    .page{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 8px;padding-top:max(16px,env(safe-area-inset-top))}
-    .tabbar{display:flex;background:#0d0d0f;border-top:1px solid #1e1e22;padding-bottom:max(12px,env(safe-area-inset-bottom));flex-shrink:0}
-    .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 6px;gap:3px;cursor:pointer}
+    html,body{height:100%;overflow:hidden}
+    #root{height:100%}
+    .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+    .page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 16px;padding-top:max(16px,env(safe-area-inset-top))}
+    .tabbar{flex-shrink:0;display:flex;background:#0d0d0f;border-top:1px solid #1e1e22;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+    .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 4px;gap:3px;cursor:pointer}
     .card{background:#111113;border:1px solid #1e1e22;border-radius:18px;padding:18px;margin-bottom:12px}
     .lbl{font-size:10px;color:#555;letter-spacing:.12em;text-transform:uppercase}
     @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -99,7 +100,14 @@ const fmtDate=d=>new Date(d+"T12:00:00").toLocaleDateString("nl-NL",{day:"numeri
 function lsGet(k,fb=null){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):fb}catch{return fb}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 function getExHist(id){const a=lsGet("pf_ex",{});return(a[id]||[]).sort((a,b)=>b.date.localeCompare(a.date))}
-function saveExSets(id,sets){const a=lsGet("pf_ex",{});if(!a[id])a[id]=[];a[id]=[{date:todayKey(),sets},...a[id].filter(e=>e.date!==todayKey())].slice(0,60);lsSet("pf_ex",a)}
+function saveExSets(id,sets){
+  // Filter out 0kg/0reps entries
+  const valid=sets.filter(s=>{const w=parseFloat(s.weight)||0,r=parseFloat(s.reps)||0;return w>0||r>0});
+  const a=lsGet("pf_ex",{});if(!a[id])a[id]=[];
+  if(valid.length>0){a[id]=[{date:todayKey(),sets:valid},...a[id].filter(e=>e.date!==todayKey())].slice(0,60);}
+  else{a[id]=a[id].filter(e=>e.date!==todayKey());}
+  lsSet("pf_ex",a);
+}
 function getTodaySets(id){return getExHist(id).find(x=>x.date===todayKey())?.sets||null}
 function getPR(id){let pr=0;getExHist(id).forEach(h=>h.sets.forEach(s=>{const w=parseFloat(s.weight)||0;if(w>pr)pr=w;}));return pr}
 
@@ -146,9 +154,9 @@ function ExModal({ex,dayColor,onClose}){
   }
 
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400,backdropFilter:"blur(8px)",padding:"20px 16px"}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"#141416",border:"1px solid #2a2a2e",borderRadius:20,padding:"20px 20px 28px",width:"100%",maxWidth:480,maxHeight:"80vh",overflowY:"auto"}}>
-        <div style={{width:36,height:4,background:"#2a2a2e",borderRadius:2,margin:"0 auto 16px"}}/>
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:400,backdropFilter:"blur(6px)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#161618",border:"1px solid #2a2a2e",borderRadius:"20px 20px 0 0",padding:"0 20px max(28px,env(safe-area-inset-bottom))",width:"100%",maxWidth:480,maxHeight:"82vh",overflowY:"auto"}}>
+        <div style={{width:40,height:4,background:"#2a2a2e",borderRadius:2,margin:"12px auto 18px",flexShrink:0}}/>
         <div style={{marginBottom:14}}>
           <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#fff"}}>
             {ex.name}
@@ -218,9 +226,9 @@ function WeekHistModal({onClose}){
   const hist=lsGet("pf_week_history",{});
   const weeks=Object.keys(hist).sort((a,b)=>b.localeCompare(a)).slice(0,12);
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400,backdropFilter:"blur(8px)",padding:"20px 16px"}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"#141416",border:"1px solid #2a2a2e",borderRadius:20,padding:"20px 20px 28px",width:"100%",maxWidth:480,maxHeight:"80vh",overflowY:"auto"}}>
-        <div style={{width:36,height:4,background:"#2a2a2e",borderRadius:2,margin:"0 auto 16px"}}/>
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:400,backdropFilter:"blur(6px)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#161618",border:"1px solid #2a2a2e",borderRadius:"20px 20px 0 0",padding:"0 20px max(28px,env(safe-area-inset-bottom))",width:"100%",maxWidth:480,maxHeight:"82vh",overflowY:"auto"}}>
+        <div style={{width:40,height:4,background:"#2a2a2e",borderRadius:2,margin:"12px auto 18px",flexShrink:0}}/>
         <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#fff",marginBottom:18}}>Week Geschiedenis</div>
         {weeks.length===0?<div style={{color:"#444",fontSize:12,textAlign:"center",padding:"28px 0"}}>Nog geen data.</div>:(
           <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -256,9 +264,9 @@ function BWModal({onClose}){
   const latest=hist[0],prev=hist[1];
   const diff=latest&&prev?(latest.w-prev.w).toFixed(1):null;
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400,backdropFilter:"blur(8px)",padding:"20px 16px"}}>
-      <div onClick={e=>e.stopPropagation()} style={{background:"#141416",border:"1px solid #2a2a2e",borderRadius:20,padding:"20px 20px 28px",width:"100%",maxWidth:480,maxHeight:"80vh",overflowY:"auto"}}>
-        <div style={{width:36,height:4,background:"#2a2a2e",borderRadius:2,margin:"0 auto 16px"}}/>
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.75)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:400,backdropFilter:"blur(6px)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:"#161618",border:"1px solid #2a2a2e",borderRadius:"20px 20px 0 0",padding:"0 20px max(28px,env(safe-area-inset-bottom))",width:"100%",maxWidth:480,maxHeight:"82vh",overflowY:"auto"}}>
+        <div style={{width:40,height:4,background:"#2a2a2e",borderRadius:2,margin:"12px auto 18px",flexShrink:0}}/>
         <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#fff",marginBottom:18}}>Lichaamsgewicht</div>
         {latest&&<div style={{marginBottom:14,padding:"14px",borderRadius:14,background:"#0d0d0f",border:"1px solid #1e1e22",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
@@ -365,7 +373,12 @@ function TodayTab(){
     const h=lsGet("pf_week_history",{});
     h[todayKey().slice(0,7)]=weekDone;
     lsSet("pf_week_history",h);
-    if(weekDone[todayShort]){const c=lsGet("pf_cal",{});c[todayKey()]=true;lsSet("pf_cal",c)}
+    // Sync to calendar - directly use today's date key
+    const cal=lsGet("pf_cal",{});
+    const isChecked=!!weekDone[todayShort];
+    if(isChecked){cal[todayKey()]=true;}
+    else{delete cal[todayKey()];}
+    lsSet("pf_cal",cal);
   },[weekDone]);
 
   const col=DAY_COLORS[splitIdx];
@@ -565,7 +578,7 @@ function StatsTab(){
     const tw=hist.filter(h=>weekDays.includes(h.date));
     if(tw.length){
       // Only count sets that actually have weight or reps filled in
-      const realSets=tw.reduce((a,s)=>a+s.sets.filter(x=>x.weight||x.reps).length,0);
+      const realSets=tw.reduce((a,s)=>a+s.sets.filter(x=>(parseFloat(x.weight)||0)>0||(parseFloat(x.reps)||0)>0).length,0);
       if(realSets>0){
         if(!volByMuscle[ex.muscle])volByMuscle[ex.muscle]=0;
         volByMuscle[ex.muscle]+=realSets;
@@ -663,6 +676,8 @@ function CalendarTab(){
   const [yr,setYr]=useState(now.getFullYear());
   const [mo,setMo]=useState(now.getMonth());
   const [calData,setCalData]=useState(()=>lsGet("pf_cal",{}));
+  // Re-read on mount to catch updates from other tabs
+  useEffect(()=>{setCalData(lsGet("pf_cal",{}));},[]);
 
   const monthName=new Date(yr,mo,1).toLocaleDateString("nl-NL",{month:"long",year:"numeric"});
   const firstDow=new Date(yr,mo,1).getDay();
@@ -737,6 +752,65 @@ function CalendarTab(){
 const T12="T12:00:00";
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
+// ─── NOTITIES TAB ─────────────────────────────────────────────────────────────
+function NotesTab(){
+  const notes=[];
+  // Gather all saved notes from localStorage
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith("pf_note_")){
+      const date=k.replace("pf_note_","");
+      const text=lsGet(k,"");
+      if(text&&text.trim())notes.push({date,text:text.trim()});
+    }
+  }
+  notes.sort((a,b)=>b.date.localeCompare(a.date));
+
+  const today=new Date().toISOString().slice(0,10);
+  const fmtFull=d=>{
+    const dt=new Date(d+"T12:00:00");
+    return dt.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
+  };
+
+  // Find what workout day it was
+  function getWorkoutLabel(date){
+    const cal=lsGet("pf_cal",{});
+    const weekData=lsGet("pf_week_history",{});
+    const monthKey=date.slice(0,7);
+    const dayOfWeek=new Date(date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short"});
+    const week=weekData[monthKey]||{};
+    if(cal[date]||week[dayOfWeek])return"getraind";
+    return"rustdag";
+  }
+
+  return(
+    <div className="fu">
+      <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#fff",marginBottom:16}}>Notities</div>
+      {notes.length===0?(
+        <div className="card">
+          <div style={{color:"#444",fontSize:12,textAlign:"center",padding:"24px 0"}}>Nog geen notities. Schrijf iets na je training!</div>
+        </div>
+      ):(
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {notes.map(n=>{
+            const isToday=n.date===today;
+            const label=getWorkoutLabel(n.date);
+            return(
+              <div key={n.date} className="card">
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:700,color:isToday?"#a3e635":"#e8e8e8",textTransform:"capitalize"}}>{fmtFull(n.date)}</div>
+                  <div style={{fontSize:10,color:label==="getraind"?"#a3e635":"#555",background:label==="getraind"?"#a3e63515":"transparent",border:label==="getraind"?"1px solid #a3e63530":"none",padding:"2px 8px",borderRadius:6}}>{label}</div>
+                </div>
+                <div style={{fontSize:13,color:"#888",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{n.text}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const TABS=[
   {id:"today",label:"Vandaag",
     icon:a=><svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={a?"#a3e635":"#555"} strokeWidth={2} strokeLinecap="round"><rect x={3} y={4} width={18} height={18} rx={3}/><line x1={16} y1={2} x2={16} y2={6}/><line x1={8} y1={2} x2={8} y2={6}/><line x1={3} y1={10} x2={21} y2={10}/></svg>},
@@ -744,8 +818,10 @@ const TABS=[
     icon:a=><svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={a?"#38bdf8":"#555"} strokeWidth={2} strokeLinecap="round"><line x1={18} y1={20} x2={18} y2={10}/><line x1={12} y1={20} x2={12} y2={4}/><line x1={6} y1={20} x2={6} y2={14}/></svg>},
   {id:"calendar",label:"Kalender",
     icon:a=><svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={a?"#f472b6":"#555"} strokeWidth={2} strokeLinecap="round"><rect x={3} y={4} width={18} height={18} rx={3}/><line x1={16} y1={2} x2={16} y2={6}/><line x1={8} y1={2} x2={8} y2={6}/><line x1={3} y1={10} x2={21} y2={10}/><line x1={8} y1={14} x2={8} y2={14} strokeWidth={3}/><line x1={12} y1={14} x2={12} y2={14} strokeWidth={3}/><line x1={16} y1={14} x2={16} y2={14} strokeWidth={3}/></svg>},
+  {id:"notes",label:"Notities",
+    icon:a=><svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={a?"#fb923c":"#555"} strokeWidth={2} strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1={16} y1={13} x2={8} y2={13}/><line x1={16} y1={17} x2={8} y2={17}/><polyline points="10 9 9 9 8 9"/></svg>},
 ];
-const ACTIVE_COLORS={today:"#a3e635",stats:"#38bdf8",calendar:"#f472b6"};
+const ACTIVE_COLORS={today:"#a3e635",stats:"#38bdf8",calendar:"#f472b6",notes:"#fb923c"};
 
 function App(){
   const [tab,setTab]=useState("today");
@@ -755,6 +831,7 @@ function App(){
         {tab==="today"&&<TodayTab/>}
         {tab==="stats"&&<StatsTab/>}
         {tab==="calendar"&&<CalendarTab/>}
+        {tab==="notes"&&<NotesTab/>}
       </div>
       <div className="tabbar">
         {TABS.map(t=>(
