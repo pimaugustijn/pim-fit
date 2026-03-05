@@ -164,20 +164,25 @@ function getDailyQuote(){
   const day=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,1))/(86400000));
   return QUOTES[day%QUOTES.length];
 }
+let _actx=null;
+function getActx(){
+  if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==="suspended")_actx.resume();
+  return _actx;
+}
 function playBeep(){
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [0,150,300].forEach(delay=>{
+    const ctx=getActx();
+    [0,180,360].forEach(delay=>{
       const o=ctx.createOscillator();
       const g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
-      o.frequency.value=880;
-      o.type="sine";
-      g.gain.setValueAtTime(0,ctx.currentTime+delay/1000);
-      g.gain.linearRampToValueAtTime(0.3,ctx.currentTime+delay/1000+0.01);
-      g.gain.linearRampToValueAtTime(0,ctx.currentTime+delay/1000+0.18);
-      o.start(ctx.currentTime+delay/1000);
-      o.stop(ctx.currentTime+delay/1000+0.2);
+      o.frequency.value=900;o.type="sine";
+      const t=ctx.currentTime+delay/1000;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.4,t+0.01);
+      g.gain.linearRampToValueAtTime(0,t+0.22);
+      o.start(t);o.stop(t+0.25);
     });
   }catch{}
 }
@@ -398,7 +403,7 @@ function RestTimer(){
         <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
           <div style={{display:"flex",gap:8}}>
             {!running
-              ?<button onClick={()=>{setDone(false);setRunning(true);}} style={{flex:1,padding:"10px 0",borderRadius:10,background:done?"#a3e63520":"#38bdf820",border:`1px solid ${done?"#a3e63550":"#38bdf850"}`,color:done?"#a3e635":"#38bdf8",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>{done?"Again":seconds===custom?"Start":"Resume"}</button>
+              ?<button onClick={()=>{try{getActx();}catch{}setDone(false);setRunning(true);}} style={{flex:1,padding:"10px 0",borderRadius:10,background:done?"#a3e63520":"#38bdf820",border:`1px solid ${done?"#a3e63550":"#38bdf850"}`,color:done?"#a3e635":"#38bdf8",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>{done?"Again":seconds===custom?"Start":"Resume"}</button>
               :<button onClick={()=>setRunning(false)} style={{flex:1,padding:"10px 0",borderRadius:10,background:"#fb923c20",border:"1px solid #fb923c50",color:"#fb923c",fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:13,cursor:"pointer"}}>Pause</button>
             }
             <button onClick={()=>{clearInterval(ref.current);setRunning(false);setDone(false);setSeconds(custom);}} style={{padding:"10px 14px",borderRadius:10,background:"transparent",border:"1px solid #2a2a2e",color:"#555",fontSize:12,cursor:"pointer"}}>↺</button>
