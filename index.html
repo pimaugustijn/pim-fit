@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pim Fit" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <title>Pim Fit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #0d0d0f; min-height: 100%; overscroll-behavior: none; }
+    body { font-family: 'DM Mono', monospace; color: #e8e8e8; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 0; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=range] { -webkit-appearance: none; appearance: none; height: 3px; background: #2a2a2e; border-radius: 2px; outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #a3e635; cursor: pointer; }
+    button { -webkit-tap-highlight-color: transparent; }
+    #root { max-width: 480px; margin: 0 auto; padding: 28px 16px 48px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const DAYS = ["Upper A", "Lower", "Upper B", "Upper C"];
+const DAY_COLORS = ["#a3e635", "#38bdf8", "#f472b6", "#fb923c"];
+const WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const WORKOUTS = {
+  "Upper A": [
+    { id: "ua1", name: "Chest Press Machine", detail: "flat · wide grip", sets: "3×8-7-6" },
+    { id: "ua2", name: "Lat Pulldown", detail: "wide grip", sets: "3×8-7-6" },
+    { id: "ua3", name: "Cable Row", detail: "close grip", sets: "3×8-7-6" },
+    { id: "ua4", name: "Shoulder Press Machine", detail: "", sets: "3×8-7-6" },
+    { id: "ua5", name: "Cable Curl", detail: "supinated", sets: "3×8-7-6" },
+    { id: "ua6", name: "Cable Pushdown", detail: "triceps", sets: "3×8-7-6" },
+    { id: "ua7", name: "Ab Crunch Machine", detail: "", sets: "3×12-15" },
+  ],
+  "Lower": [
+    { id: "lo1", name: "Leg Press", detail: "quads + glutes", sets: "4×8-10" },
+    { id: "lo2", name: "Hamstring Curl", detail: "", sets: "3×8-10" },
+    { id: "lo3", name: "Leg Extension", detail: "quads isolatie", sets: "3×10-12" },
+    { id: "lo4", name: "Calf Raise", detail: "", sets: "3×12-15" },
+    { id: "lo5", name: "Ab Crunch Machine", detail: "", sets: "3×12-15" },
+  ],
+  "Upper B": [
+    { id: "ub1", name: "Incline Chest Press", detail: "Smith machine · 30-45°", sets: "3×8-7-6" },
+    { id: "ub2", name: "Lat Pulldown", detail: "close grip / V-bar", sets: "3×8-7-6" },
+    { id: "ub3", name: "Cable Row", detail: "wide grip", sets: "3×8-7-6" },
+    { id: "ub4", name: "Lateral Raise", detail: "dumbbells", sets: "3×10-12" },
+    { id: "ub5", name: "Hammer Curl", detail: "dumbbells", sets: "3×8-7-6" },
+    { id: "ub6", name: "Overhead Extension", detail: "kabel · lange kop", sets: "3×8-7-6" },
+    { id: "ub7", name: "Ab Crunch Machine", detail: "", sets: "3×12-15" },
+  ],
+  "Upper C": [
+    { id: "uc1", name: "Chest Fly Machine", detail: "pec deck · stretch focus", sets: "3×10-12" },
+    { id: "uc2", name: "Lat Pulldown", detail: "wide grip · slow eccentric", sets: "3×10-12" },
+    { id: "uc3", name: "Cable Row", detail: "close grip · squeeze", sets: "3×10-12" },
+    { id: "uc4", name: "Face Pull", detail: "rear delt + rotator cuff", sets: "3×15-20" },
+    { id: "uc5", name: "Incline Dumbbell Curl", detail: "long head biceps", sets: "3×10-12" },
+    { id: "uc6", name: "Cable Pushdown", detail: "rope attachment", sets: "3×10-12" },
+    { id: "uc7", name: "Ab Crunch Machine", detail: "", sets: "3×12-15" },
+  ],
+};
+
+const SUPPLEMENTS = [
+  { id: "creatine", label: "Creatine", dose: "5g" },
+  { id: "vitd", label: "Vitamin D", dose: "2000IU" },
+  { id: "omega3", label: "Omega-3", dose: "1–2 caps" },
+  { id: "mag", label: "Magnesium + B6", dose: "before bed" },
+];
+
+const MACROS = [
+  { key: "kcal", label: "Calories", target: 2100, unit: "kcal", color: "#a3e635" },
+  { key: "protein", label: "Protein", target: 145, unit: "g", color: "#38bdf8" },
+  { key: "carbs", label: "Carbs", target: 220, unit: "g", color: "#f472b6" },
+  { key: "fat", label: "Fat", target: 65, unit: "g", color: "#fb923c" },
+];
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+const todayKey = () => new Date().toISOString().slice(0, 10);
+const fmtDate = (d) => new Date(d + "T12:00:00").toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+
+function lsGet(key, fallback = null) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+function getExHistory(exId) {
+  const all = lsGet("fit_ex_history", {});
+  return (all[exId] || []).sort((a, b) => b.date.localeCompare(a.date));
+}
+function saveExSets(exId, sets) {
+  const all = lsGet("fit_ex_history", {});
+  if (!all[exId]) all[exId] = [];
+  const filtered = all[exId].filter(e => e.date !== todayKey());
+  all[exId] = [{ date: todayKey(), sets }, ...filtered].slice(0, 30);
+  lsSet("fit_ex_history", all);
+}
+function getTodaySets(exId) {
+  const hist = getExHistory(exId);
+  const today = hist.find(h => h.date === todayKey());
+  return today ? today.sets : null;
+}
+
+// ─── SPARKLINE ────────────────────────────────────────────────────────────────
+function Sparkline({ data, color }) {
+  if (!data || data.length < 2) return null;
+  const max = Math.max(...data), min = Math.min(...data), range = max - min || 1;
+  const w = 64, h = 28;
+  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 6) - 3}`).join(" ");
+  const last = pts.split(" ").pop().split(",");
+  return (
+    <svg width={w} height={h}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" opacity={0.9} />
+      <circle cx={last[0]} cy={last[1]} r={3} fill={color} />
+    </svg>
+  );
+}
+
+// ─── EXERCISE MODAL ───────────────────────────────────────────────────────────
+function ExerciseModal({ ex, dayColor, onClose }) {
+  const prev = getExHistory(ex.id).filter(h => h.date !== todayKey());
+  const todaySaved = getTodaySets(ex.id);
+  const [sets, setSets] = useState(todaySaved || [{ weight: "", reps: "" }, { weight: "", reps: "" }, { weight: "", reps: "" }]);
+  const [tab, setTab] = useState("log");
+  const [saved, setSaved] = useState(false);
+
+  const sparkData = [...prev].reverse().map(h => Math.max(...h.sets.map(s => parseFloat(s.weight) || 0))).filter(v => v > 0);
+  const maxEver = sparkData.length ? Math.max(...sparkData) : null;
+
+  function handleSave() {
+    const valid = sets.filter(s => s.weight !== "" || s.reps !== "");
+    if (valid.length) saveExSets(ex.id, valid);
+    setSaved(true);
+    setTimeout(onClose, 600);
+  }
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 200, backdropFilter: "blur(8px)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#141416", border: "1px solid #2a2a2e", borderRadius: "22px 22px 0 0", padding: "8px 20px 40px", width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto" }}>
+        <div style={{ width: 36, height: 4, background: "#2a2a2e", borderRadius: 2, margin: "14px auto 20px" }} />
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 19, fontWeight: 800, color: "#fff" }}>{ex.name}</div>
+          <div style={{ fontSize: 11, color: "#555", marginTop: 3 }}>{[ex.detail, ex.sets].filter(Boolean).join(" · ")}</div>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
+          {[["log", "Log sets"], ["history", "Progressie"]].map(([t, label]) => (
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "8px 0", borderRadius: 10, background: tab === t ? dayColor + "20" : "#1a1a1e", border: `1px solid ${tab === t ? dayColor + "60" : "#2a2a2e"}`, color: tab === t ? dayColor : "#555", fontFamily: "'DM Mono', monospace", fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</button>
+          ))}
+        </div>
+
+        {tab === "log" ? (
+          <>
+            {prev.length > 0 && (
+              <div style={{ marginBottom: 14, padding: "12px 14px", borderRadius: 12, background: "#0d0d0f", border: "1px solid #1e1e22" }}>
+                <div style={{ fontSize: 10, color: "#555", marginBottom: 8 }}>Vorige sessie · {fmtDate(prev[0].date)}</div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {prev[0].sets.map((s, i) => (
+                    <div key={i} style={{ fontSize: 11, color: dayColor, background: dayColor + "18", padding: "4px 10px", borderRadius: 7, fontFamily: "'DM Mono', monospace" }}>{s.weight}kg × {s.reps}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8, marginBottom: 6, paddingLeft: 28 }}>
+              <div style={{ flex: 2, fontSize: 10, color: "#444", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>kg</div>
+              <div style={{ flex: 2, fontSize: 10, color: "#444", textAlign: "center", textTransform: "uppercase", letterSpacing: "0.08em" }}>reps</div>
+              <div style={{ width: 28 }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
+              {sets.map((s, idx) => (
+                <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: 11, color: "#444", fontFamily: "'DM Mono', monospace", width: 20, textAlign: "right", flexShrink: 0 }}>{idx + 1}</div>
+                  <input type="number" inputMode="decimal" placeholder="—" value={s.weight}
+                    onChange={e => setSets(ss => ss.map((x, i) => i === idx ? { ...x, weight: e.target.value } : x))}
+                    style={{ flex: 2, background: "#1a1a1e", border: `1px solid ${s.weight ? dayColor + "50" : "#2a2a2e"}`, borderRadius: 9, padding: "11px 8px", color: "#fff", fontSize: 16, fontFamily: "'DM Mono', monospace", outline: "none", textAlign: "center" }}
+                  />
+                  <input type="number" inputMode="numeric" placeholder="—" value={s.reps}
+                    onChange={e => setSets(ss => ss.map((x, i) => i === idx ? { ...x, reps: e.target.value } : x))}
+                    style={{ flex: 2, background: "#1a1a1e", border: `1px solid ${s.reps ? dayColor + "50" : "#2a2a2e"}`, borderRadius: 9, padding: "11px 8px", color: "#fff", fontSize: 16, fontFamily: "'DM Mono', monospace", outline: "none", textAlign: "center" }}
+                  />
+                  <button onClick={() => sets.length > 1 && setSets(ss => ss.filter((_, i) => i !== idx))} style={{ width: 28, height: 28, borderRadius: 7, background: "transparent", border: "1px solid #2a2a2e", color: "#444", fontSize: 13, cursor: "pointer", flexShrink: 0 }}>×</button>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setSets(ss => [...ss, { weight: "", reps: "" }])} style={{ width: "100%", padding: "9px 0", borderRadius: 10, background: "transparent", border: "1px dashed #2a2a2e", color: "#555", fontFamily: "'DM Mono', monospace", fontSize: 11, cursor: "pointer", marginBottom: 14 }}>+ set toevoegen</button>
+            <button onClick={handleSave} style={{ width: "100%", padding: "15px 0", borderRadius: 13, background: saved ? "#a3e635" : dayColor, color: "#000", border: "none", fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 15, cursor: "pointer", transition: "background 0.2s" }}>{saved ? "✓ Opgeslagen!" : "Opslaan"}</button>
+          </>
+        ) : (
+          <div>
+            {prev.length === 0 ? (
+              <div style={{ color: "#444", fontSize: 12, textAlign: "center", padding: "32px 0" }}>Nog geen sessies. Log je eerste sets!</div>
+            ) : (
+              <>
+                {sparkData.length >= 2 && (
+                  <div style={{ marginBottom: 16, padding: "16px", borderRadius: 14, background: "#0d0d0f", border: "1px solid #1e1e22", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Max gewicht</div>
+                      <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 26, fontWeight: 800, color: dayColor, letterSpacing: "-1px" }}>{maxEver}kg</div>
+                      <div style={{ fontSize: 10, marginTop: 3, color: sparkData[sparkData.length - 1] > sparkData[0] ? "#a3e635" : "#f87171" }}>
+                        {sparkData[sparkData.length - 1] > sparkData[0] ? `▲ +${(sparkData[sparkData.length - 1] - sparkData[0]).toFixed(1)}kg` : `▼ ${(sparkData[sparkData.length - 1] - sparkData[0]).toFixed(1)}kg`} sinds start
+                      </div>
+                    </div>
+                    <Sparkline data={sparkData} color={dayColor} />
+                  </div>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {prev.slice(0, 10).map((h, i) => (
+                    <div key={i} style={{ padding: "12px 14px", borderRadius: 12, background: "#0d0d0f", border: `1px solid ${i === 0 ? dayColor + "30" : "#1e1e22"}` }}>
+                      <div style={{ fontSize: 10, color: i === 0 ? dayColor : "#555", marginBottom: 8 }}>{i === 0 ? "Laatste · " : ""}{fmtDate(h.date)}</div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {h.sets.map((s, j) => (
+                          <div key={j} style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: i === 0 ? dayColor : "#777", background: i === 0 ? dayColor + "15" : "#1a1a1e", padding: "4px 10px", borderRadius: 7 }}>{s.weight}kg × {s.reps}</div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── REST TIMER ───────────────────────────────────────────────────────────────
+function RestTimer() {
+  const [seconds, setSeconds] = useState(120);
+  const [custom, setCustom] = useState(120);
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (running && seconds > 0) { ref.current = setInterval(() => setSeconds(s => s - 1), 1000); }
+    else if (seconds === 0) { clearInterval(ref.current); setRunning(false); setDone(true); }
+    return () => clearInterval(ref.current);
+  }, [running, seconds]);
+
+  const pct = seconds / custom, r = 44, circ = 2 * Math.PI * r;
+  const color = done ? "#a3e635" : pct > 0.5 ? "#38bdf8" : pct > 0.2 ? "#fb923c" : "#f87171";
+
+  return (
+    <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+      <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>Rest Timer</div>
+      <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
+        {[60, 90, 120, 180].map(p => (
+          <button key={p} onClick={() => { setCustom(p); setSeconds(p); setRunning(false); setDone(false); }} style={{ flex: 1, padding: "6px 0", borderRadius: 8, background: custom === p ? "#38bdf820" : "#1a1a1e", border: `1px solid ${custom === p ? "#38bdf860" : "#2a2a2e"}`, color: custom === p ? "#38bdf8" : "#555", fontSize: 10, fontFamily: "'DM Mono', monospace", cursor: "pointer" }}>{p < 60 ? `${p}s` : `${p / 60}min`}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width={100} height={100} style={{ transform: "rotate(-90deg)" }}>
+            <circle cx={50} cy={50} r={r} fill="none" stroke="#1e1e22" strokeWidth={8} />
+            <circle cx={50} cy={50} r={r} fill="none" stroke={color} strokeWidth={8} strokeDasharray={`${pct * circ} ${circ}`} strokeLinecap="round" style={{ transition: "stroke-dasharray 0.4s linear, stroke 0.4s ease" }} />
+          </svg>
+          <div style={{ position: "absolute", fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 800, color: done ? "#a3e635" : "#fff", letterSpacing: "-1px" }}>
+            {done ? "✓" : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
+          </div>
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            {!running
+              ? <button onClick={() => { setDone(false); setRunning(true); }} style={{ flex: 1, padding: "10px 0", borderRadius: 10, background: done ? "#a3e63520" : "#38bdf820", border: `1px solid ${done ? "#a3e63550" : "#38bdf850"}`, color: done ? "#a3e635" : "#38bdf8", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{done ? "Again" : seconds === custom ? "Start" : "Resume"}</button>
+              : <button onClick={() => setRunning(false)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, background: "#fb923c20", border: "1px solid #fb923c50", color: "#fb923c", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Pause</button>
+            }
+            <button onClick={() => { clearInterval(ref.current); setRunning(false); setDone(false); setSeconds(custom); }} style={{ padding: "10px 14px", borderRadius: 10, background: "transparent", border: "1px solid #2a2a2e", color: "#555", fontFamily: "'DM Mono', monospace", fontSize: 12, cursor: "pointer" }}>↺</button>
+          </div>
+          <div style={{ fontSize: 10, color: "#444" }}>{done ? "Rest done — get back to it 💪" : running ? "Resting..." : "Tap Start after your set"}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── RING ─────────────────────────────────────────────────────────────────────
+function Ring({ pct, color, size = 72, stroke = 7 }) {
+  const r = (size - stroke) / 2, circ = 2 * Math.PI * r;
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#1e1e22" strokeWidth={stroke} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeDasharray={`${Math.min(pct, 1) * circ} ${circ}`} strokeLinecap="round" style={{ transition: "stroke-dasharray 0.6s cubic-bezier(.4,0,.2,1)" }} />
+    </svg>
+  );
+}
+
+// ─── MACRO MODAL ─────────────────────────────────────────────────────────────
+function MacroModal({ macro, current, onSave, onClose }) {
+  const [val, setVal] = useState("");
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, backdropFilter: "blur(4px)" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#141416", border: "1px solid #2a2a2e", borderRadius: 16, padding: "28px 28px", minWidth: 260, display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, color: macro.color, fontWeight: 700 }}>Log {macro.label}</div>
+        <div style={{ color: "#666", fontSize: 12 }}>Doel: {macro.target}{macro.unit} · Nu: {current}{macro.unit}</div>
+        <input autoFocus type="number" inputMode="decimal" placeholder={`Voeg ${macro.unit} toe...`} value={val} onChange={e => setVal(e.target.value)}
+          style={{ background: "#1e1e22", border: `1px solid ${macro.color}44`, borderRadius: 10, padding: "12px 14px", color: "#fff", fontSize: 18, fontFamily: "'DM Mono', monospace", outline: "none" }} />
+        <button onClick={() => { onSave(Number(val)); onClose(); }} style={{ background: macro.color, color: "#000", border: "none", borderRadius: 10, padding: "13px 0", fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 15, cursor: "pointer" }}>Toevoegen</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── APP ─────────────────────────────────────────────────────────────────────
+function App() {
+  const today = new Date();
+  const dayName = today.toLocaleDateString("nl-NL", { weekday: "long" });
+  const dateStr = today.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
+  const todayShort = today.toLocaleDateString("en-US", { weekday: "short" });
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+
+  const [splitIdx, setSplitIdx] = useState(() => lsGet("fit_splitIdx", dayOfYear % 4));
+  const [restDay, setRestDay] = useState(false);
+  const [exDone, setExDone] = useState(() => lsGet(`fit_exDone_${todayKey()}`, {}));
+  const [activeEx, setActiveEx] = useState(null);
+  const [lastWeights, setLastWeights] = useState({});
+
+  const [macros, setMacros] = useState(() => lsGet(`fit_macros_${todayKey()}`, { kcal: 0, protein: 0, carbs: 0, fat: 0 }));
+  const [activeMacro, setActiveMacro] = useState(null);
+  const [supps, setSupps] = useState(() => lsGet(`fit_supps_${todayKey()}`, {}));
+  const [sleep, setSleep] = useState(() => lsGet(`fit_sleep_${todayKey()}`, 7.5));
+  const [weekDone, setWeekDone] = useState(() => lsGet(`fit_week_${todayKey().slice(0, 7)}`, { Mon: false, Tue: false, Wed: false, Thu: false, Fri: false, Sat: false, Sun: false }));
+
+  // Persist state
+  useEffect(() => { lsSet("fit_splitIdx", splitIdx); }, [splitIdx]);
+  useEffect(() => { lsSet(`fit_exDone_${todayKey()}`, exDone); }, [exDone]);
+  useEffect(() => { lsSet(`fit_macros_${todayKey()}`, macros); }, [macros]);
+  useEffect(() => { lsSet(`fit_supps_${todayKey()}`, supps); }, [supps]);
+  useEffect(() => { lsSet(`fit_sleep_${todayKey()}`, sleep); }, [sleep]);
+  useEffect(() => { lsSet(`fit_week_${todayKey().slice(0, 7)}`, weekDone); }, [weekDone]);
+
+  const currentDayColor = DAY_COLORS[splitIdx];
+  const exercises = WORKOUTS[DAYS[splitIdx]] || [];
+  const doneCount = exercises.filter(e => exDone[e.id]).length;
+  const totalPct = MACROS.reduce((acc, m) => acc + Math.min(macros[m.key] / m.target, 1), 0) / MACROS.length;
+
+  function loadWeights(idx) {
+    const exs = WORKOUTS[DAYS[idx]] || [];
+    const weights = {};
+    exs.forEach(ex => {
+      const hist = getExHistory(ex.id).filter(h => h.date !== todayKey());
+      if (hist.length > 0) {
+        const maxW = Math.max(...hist[0].sets.map(s => parseFloat(s.weight) || 0));
+        if (maxW > 0) weights[ex.id] = maxW;
+      }
+    });
+    setLastWeights(weights);
+  }
+
+  useEffect(() => { loadWeights(splitIdx); }, [splitIdx]);
+
+  return (
+    <div style={{ color: "#e8e8e8", fontFamily: "'DM Mono', monospace" }}>
+
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
+        <div>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "-0.5px" }}>Hey Pim 👋</div>
+          <div style={{ color: "#555", fontSize: 12, marginTop: 3 }}>{dayName} · {dateStr}</div>
+        </div>
+        <button onClick={() => { const fresh = { kcal: 0, protein: 0, carbs: 0, fat: 0 }; setMacros(fresh); setSupps({}); lsSet(`fit_macros_${todayKey()}`, fresh); lsSet(`fit_supps_${todayKey()}`, {}); }}
+          style={{ background: "transparent", border: "1px solid #2a2a2e", color: "#555", borderRadius: 8, padding: "6px 12px", fontSize: 11, fontFamily: "'DM Mono', monospace", cursor: "pointer" }}>reset dag</button>
+      </div>
+
+      {/* Workout card */}
+      <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>Vandaag</div>
+          <button onClick={() => setRestDay(r => !r)} style={{ background: restDay ? "#2a2a2e" : "transparent", border: "1px solid #2a2a2e", color: restDay ? "#a3e635" : "#555", borderRadius: 6, padding: "4px 10px", fontSize: 10, fontFamily: "'DM Mono', monospace", cursor: "pointer" }}>
+            {restDay ? "✓ Rustdag" : "Rustdag"}
+          </button>
+        </div>
+
+        {!restDay ? (
+          <>
+            <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 800, color: currentDayColor, letterSpacing: "-1px", marginBottom: 14 }}>{DAYS[splitIdx]}</div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              {DAYS.map((d, i) => (
+                <button key={d} onClick={() => setSplitIdx(i)} style={{ flex: 1, padding: "8px 4px", borderRadius: 10, background: i === splitIdx ? DAY_COLORS[i] + "20" : "#1a1a1e", border: `1px solid ${i === splitIdx ? DAY_COLORS[i] + "60" : "#2a2a2e"}`, color: i === splitIdx ? DAY_COLORS[i] : "#444", fontSize: 9, fontFamily: "'DM Mono', monospace", cursor: "pointer", letterSpacing: "0.05em", textTransform: "uppercase", whiteSpace: "pre-line" }}>{d.replace(" ", "\n")}</button>
+              ))}
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <div style={{ fontSize: 10, color: "#555" }}>voortgang</div>
+                <div style={{ fontSize: 10, color: doneCount === exercises.length && exercises.length > 0 ? currentDayColor : "#555" }}>{doneCount}/{exercises.length}</div>
+              </div>
+              <div style={{ height: 3, background: "#1e1e22", borderRadius: 2 }}>
+                <div style={{ height: "100%", borderRadius: 2, background: currentDayColor, width: `${exercises.length ? (doneCount / exercises.length) * 100 : 0}%`, transition: "width 0.4s ease" }} />
+              </div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {exercises.map(ex => {
+                const done = !!exDone[ex.id];
+                const lw = lastWeights[ex.id];
+                return (
+                  <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "11px 12px", borderRadius: 12, background: done ? currentDayColor + "08" : "#0d0d0f", border: `1px solid ${done ? currentDayColor + "30" : "#1e1e22"}`, transition: "all 0.15s ease" }}>
+                    <div onClick={() => setExDone(p => ({ ...p, [ex.id]: !p[ex.id] }))} style={{ minWidth: 20, height: 20, borderRadius: 6, border: `1.5px solid ${done ? currentDayColor : "#3a3a40"}`, background: done ? currentDayColor : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#000", fontWeight: 700, flexShrink: 0, cursor: "pointer" }}>{done ? "✓" : ""}</div>
+                    <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setActiveEx(ex)}>
+                      <div style={{ fontSize: 12, color: done ? "#555" : "#e8e8e8", fontFamily: "'Syne', sans-serif", fontWeight: 700, textDecoration: done ? "line-through" : "none" }}>{ex.name}</div>
+                      <div style={{ fontSize: 10, color: "#3a3a40", marginTop: 2 }}>
+                        {[ex.detail, ex.sets].filter(Boolean).join(" · ")}
+                        {lw && <span style={{ color: currentDayColor + "90" }}> · {lw}kg</span>}
+                      </div>
+                    </div>
+                    <button onClick={() => setActiveEx(ex)} style={{ padding: "5px 11px", borderRadius: 8, flexShrink: 0, background: "transparent", border: `1px solid ${currentDayColor}35`, color: currentDayColor + "cc", fontSize: 10, fontFamily: "'DM Mono', monospace", cursor: "pointer" }}>log</button>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <div style={{ color: "#555", fontFamily: "'Syne', sans-serif", fontSize: 20, fontWeight: 700 }}>Rest & Recover 💤</div>
+        )}
+      </div>
+
+      {/* Week */}
+      <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "16px 20px", marginBottom: 16 }}>
+        <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>Week</div>
+        <div style={{ display: "flex", gap: 6 }}>
+          {WEEK.map(d => {
+            const isToday = d === todayShort, done = weekDone[d];
+            return (
+              <div key={d} onClick={() => setWeekDone(w => ({ ...w, [d]: !w[d] }))} style={{ flex: 1, aspectRatio: "1", borderRadius: 10, background: done ? "#a3e63520" : "#1a1a1e", border: `1px solid ${isToday ? "#a3e635" : done ? "#a3e63540" : "#2a2a2e"}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 3 }}>
+                <div style={{ fontSize: 8, color: isToday ? "#a3e635" : "#444" }}>{d}</div>
+                <div style={{ fontSize: 14 }}>{done ? "✓" : "·"}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Rest Timer */}
+      <RestTimer />
+
+      {/* Macros */}
+      <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase" }}>Voeding</div>
+          <div style={{ fontSize: 11, color: "#a3e635" }}>{Math.round(totalPct * 100)}% van doel</div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {MACROS.map(m => {
+            const val = macros[m.key], pct = val / m.target;
+            return (
+              <div key={m.key} onClick={() => setActiveMacro(m)} style={{ background: "#0d0d0f", border: "1px solid #1e1e22", borderRadius: 14, padding: "16px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Ring pct={pct} color={m.color} />
+                  <div style={{ position: "absolute", fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: pct >= 1 ? m.color : "#fff" }}>{Math.round(pct * 100)}%</div>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 10, color: m.color, letterSpacing: "0.08em", textTransform: "uppercase" }}>{m.label}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>{val}<span style={{ color: "#444" }}>/{m.target}{m.unit}</span></div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ textAlign: "center", color: "#444", fontSize: 10, marginTop: 12 }}>tik op een kaart om te loggen</div>
+      </div>
+
+      {/* Sleep */}
+      <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "20px", marginBottom: 16 }}>
+        <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>Slaap</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 36, fontWeight: 800, color: sleep >= 7.5 ? "#a3e635" : sleep >= 6 ? "#fb923c" : "#f87171", letterSpacing: "-2px", minWidth: 80 }}>{sleep}h</div>
+          <div style={{ flex: 1 }}>
+            <input type="range" min={3} max={10} step={0.5} value={sleep} onChange={e => setSleep(Number(e.target.value))} style={{ width: "100%", cursor: "pointer" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#444", marginTop: 6 }}>
+              <span>3h</span>
+              <span style={{ color: sleep >= 7.5 ? "#a3e635" : "#555" }}>{sleep >= 7.5 ? "🟢 Goed" : sleep >= 6 ? "🟡 Oké" : "🔴 Te weinig"}</span>
+              <span>10h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Supplements */}
+      <div style={{ background: "#111113", border: "1px solid #1e1e22", borderRadius: 16, padding: "20px" }}>
+        <div style={{ fontSize: 11, color: "#555", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 14 }}>Supplementen</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {SUPPLEMENTS.map(s => {
+            const done = !!supps[s.id];
+            return (
+              <div key={s.id} onClick={() => setSupps(p => ({ ...p, [s.id]: !p[s.id] }))} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 14px", borderRadius: 12, background: done ? "#a3e63508" : "#0d0d0f", border: `1px solid ${done ? "#a3e63530" : "#1e1e22"}`, cursor: "pointer", transition: "all 0.15s ease" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${done ? "#a3e635" : "#3a3a40"}`, background: done ? "#a3e635" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#000" }}>{done ? "✓" : ""}</div>
+                  <div>
+                    <div style={{ fontSize: 13, color: done ? "#e8e8e8" : "#888", fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>{s.label}</div>
+                    <div style={{ fontSize: 10, color: "#444" }}>{s.dose}</div>
+                  </div>
+                </div>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: done ? "#a3e635" : "#2a2a2e" }} />
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: 14, padding: "10px 14px", borderRadius: 10, background: "#0d0d0f", border: "1px solid #1e1e22" }}>
+          <div style={{ fontSize: 10, color: "#555" }}>{Object.values(supps).filter(Boolean).length}/{SUPPLEMENTS.length} genomen vandaag</div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {activeEx && <ExerciseModal ex={activeEx} dayColor={currentDayColor} onClose={() => { setActiveEx(null); loadWeights(splitIdx); }} />}
+      {activeMacro && <MacroModal macro={activeMacro} current={macros[activeMacro.key]} onSave={val => { const updated = { ...macros, [activeMacro.key]: Math.min(macros[activeMacro.key] + val, activeMacro.target * 2) }; setMacros(updated); }} onClose={() => setActiveMacro(null)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
