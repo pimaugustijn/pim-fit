@@ -26,6 +26,9 @@
     input,textarea,select{font-family:inherit}
     #root{position:fixed;top:0;right:0;left:0;height:100%;overflow:hidden}
     @supports (height:100dvh){#root{height:100dvh}}
+    html.short-vp,html.short-vp body{background:#0d0d0f}
+    html.short-vp .tabbar{padding-bottom:6px}
+    html.short-vp .sheet{padding-bottom:24px}
     .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#8b8b95}
     .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
     .page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;padding-top:max(16px,env(safe-area-inset-top))}
@@ -829,7 +832,9 @@ const FIT = {
   inner: 0,
   top: 0,
   bottom: 0,
-  standalone: false
+  standalone: false,
+  short: false,
+  full: 0
 };
 function fitScreen() {
   const root = document.getElementById("root");
@@ -843,17 +848,20 @@ function fitScreen() {
   function apply() {
     const top = probe.offsetHeight || 0,
       bottom = probeB.offsetHeight || 0;
-    let h = window.innerHeight;
-    const portrait = window.innerHeight >= window.innerWidth;
+    const inner = window.innerHeight;
+    const portrait = inner >= window.innerWidth;
     const full = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-    if (standalone && top > 0 && full > h && full - h <= 120) h = full;
-    root.style.height = h + "px";
+    const short = standalone && top > 0 && full - inner >= 30 && full - inner <= 120;
+    root.style.height = inner + "px";
+    document.documentElement.classList.toggle("short-vp", short);
     Object.assign(FIT, {
-      h,
-      inner: window.innerHeight,
+      h: inner,
+      inner,
       top,
       bottom,
-      standalone
+      standalone,
+      short,
+      full
     });
   }
   apply();
@@ -4050,7 +4058,7 @@ function ProgressTab({
       lineHeight: 1.6,
       marginTop: 4
     }
-  }, "Pim Fit 3.1", React.createElement("br", null), "scherm ", screen.width, "\xD7", screen.height, ", app ", FIT.h, ", venster ", FIT.inner, ", boven ", FIT.top, ", onder ", FIT.bottom, ", ", FIT.standalone ? "app-modus" : "browser"), showBW && React.createElement(BWModal, {
+  }, "Pim Fit 3.2", React.createElement("br", null), "scherm ", screen.width, "\xD7", screen.height, ", app ", FIT.h, ", boven ", FIT.top, ", onder ", FIT.bottom, ", ", FIT.standalone ? "app-modus" : "browser", FIT.short ? ", korte weergave" : ""), showBW && React.createElement(BWModal, {
     onClose: () => {
       setShowBW(false);
       setRev(r => r + 1);

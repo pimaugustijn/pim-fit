@@ -266,7 +266,7 @@ function nextGoals(tk,n=2){return GOALS.map(([d,l])=>({d,l,days:Math.round((new 
 
 // ─── SCHERMHOOGTE (iPhone) ────────────────────────────────────────────────────
 // iOS geeft in app-modus soms alleen het "veilige" deel van het scherm door. Dan vullen we zelf de volle hoogte.
-const FIT={h:0,inner:0,top:0,bottom:0,standalone:false};
+const FIT={h:0,inner:0,top:0,bottom:0,standalone:false,short:false,full:0};
 function fitScreen(){
   const root=document.getElementById("root");
   const probe=document.createElement("div");
@@ -276,12 +276,16 @@ function fitScreen(){
   const standalone=window.navigator.standalone===true||(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches);
   function apply(){
     const top=probe.offsetHeight||0,bottom=probeB.offsetHeight||0;
-    let h=window.innerHeight;
-    const portrait=window.innerHeight>=window.innerWidth;
+    const inner=window.innerHeight;
+    const portrait=inner>=window.innerWidth;
     const full=portrait?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
-    if(standalone&&top>0&&full>h&&full-h<=120)h=full;
-    root.style.height=h+"px";
-    Object.assign(FIT,{h,inner:window.innerHeight,top,bottom,standalone});
+    // iOS geeft een beginscherm-app soms een kortere weergave dan het scherm. Onder die hoogte tekent iOS
+    // alleen nog de achtergrondkleur. Dan houden we de app op de echte hoogte en kleuren we de strook eronder
+    // mee met de tabbalk, zodat het één geheel wordt.
+    const short=standalone&&top>0&&full-inner>=30&&full-inner<=120;
+    root.style.height=inner+"px";
+    document.documentElement.classList.toggle("short-vp",short);
+    Object.assign(FIT,{h:inner,inner,top,bottom,standalone,short,full});
   }
   apply();
   window.addEventListener("resize",apply);
@@ -1246,7 +1250,7 @@ function ProgressTab({onSchema}){
 
       <BackupCard/>
       <div className="muted" style={{fontSize:11.5,textAlign:"center",lineHeight:1.6,marginTop:4}}>
-        Pim Fit 3.1<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, venster {FIT.inner}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}
+        Pim Fit 3.2<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}{FIT.short?", korte weergave":""}
       </div>
       {showBW&&<BWModal onClose={()=>{setShowBW(false);setRev(r=>r+1)}}/>}
     </div>
