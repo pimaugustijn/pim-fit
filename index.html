@@ -24,7 +24,9 @@
     input[type=number]{-moz-appearance:textfield}
     button{-webkit-tap-highlight-color:transparent;font-family:inherit;border:none;cursor:pointer;background:transparent;color:inherit}
     input,textarea,select{font-family:inherit}
-    #root{position:fixed;top:0;right:0;bottom:0;left:0;overflow:hidden}
+    #root{position:fixed;top:0;right:0;left:0;height:100%;overflow:hidden}
+    @supports (height:100dvh){#root{height:100dvh}}
+    .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#8b8b95}
     .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
     .page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;padding-top:max(16px,env(safe-area-inset-top))}
     .tabbar{flex-shrink:0;display:flex;background:#0d0d0f;border-top:1px solid #1f1f25;padding-bottom:max(6px,env(safe-area-inset-bottom))}
@@ -334,6 +336,173 @@ const EX_DAY = {};
 Object.entries(WORKOUTS).forEach(([d, arr]) => arr.forEach(e => {
   EX_DAY[e.id] = d;
 }));
+const DOW = ["ma", "di", "wo", "do", "vr", "za", "zo"];
+const MON = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+const RUN_COLOR = "#2dd4bf";
+const RUNPLAN = [{
+  s: '2026-10-12',
+  p: 1,
+  runs: [['2026-10-15', '30 min rustig', 'easy'], ['2026-10-17', '7 km rustig', 'long', 7]]
+}, {
+  s: '2026-10-19',
+  p: 1,
+  runs: [['2026-10-22', '35 min rustig + 4 strides', 'easy'], ['2026-10-24', '8 km rustig', 'long', 8]]
+}, {
+  s: '2026-10-26',
+  p: 1,
+  tag: 'Lichte week',
+  light: true,
+  runs: [['2026-10-29', '30 min rustig', 'easy'], ['2026-10-31', '6 km rustig', 'long', 6]]
+}, {
+  s: '2026-11-02',
+  p: 1,
+  runs: [['2026-11-05', '40 min rustig + 4 strides', 'easy'], ['2026-11-07', '9 km rustig', 'long', 9]]
+}, {
+  s: '2026-11-09',
+  p: 1,
+  tag: 'Lichte week',
+  light: true,
+  runs: [['2026-11-12', '30 min rustig', 'easy'], ['2026-11-14', '7 km rustig', 'long', 7]]
+}, {
+  s: '2026-11-16',
+  p: 1,
+  tag: 'Je eerste 10 km',
+  goal: true,
+  note: 'Dinsdag lower niet tot falen, zaterdag wil je frisse benen.',
+  runs: [['2026-11-19', '25 min heel rustig', 'easy'], ['2026-11-21', '10 km, rustig tempo', 'goal', 10]]
+}, {
+  s: '2026-11-23',
+  p: 2,
+  tag: 'Herstel',
+  light: true,
+  runs: [['2026-11-26', '30 min rustig', 'easy'], ['2026-11-28', '7 km rustig', 'long', 7]]
+}, {
+  s: '2026-11-30',
+  p: 2,
+  runs: [['2026-12-03', '40 min rustig + 4 strides', 'easy'], ['2026-12-05', '10 km rustig', 'long', 10]]
+}, {
+  s: '2026-12-07',
+  p: 2,
+  runs: [['2026-12-10', '40 min rustig + 6 strides', 'easy'], ['2026-12-12', '11 km rustig', 'long', 11]]
+}, {
+  s: '2026-12-14',
+  p: 2,
+  tag: 'Lichte week',
+  light: true,
+  runs: [['2026-12-17', '30 min rustig', 'easy'], ['2026-12-19', '8 km rustig', 'long', 8]]
+}, {
+  s: '2026-12-21',
+  p: 2,
+  tag: 'Kerst',
+  note: 'Komt een dag niet uit door de feestdagen, schuif dan een dag op. Niet twee dagen achter elkaar lopen.',
+  runs: [['2026-12-24', '40 min rustig + 6 strides', 'easy'], ['2026-12-26', '12 km rustig', 'long', 12]]
+}, {
+  s: '2026-12-28',
+  p: 2,
+  tag: 'Oud en nieuw',
+  runs: [['2026-12-31', '40 min rustig', 'easy'], ['2027-01-02', '13 km rustig', 'long', 13]]
+}, {
+  s: '2027-01-04',
+  p: 3,
+  tag: 'Lichte week met testloop',
+  light: true,
+  note: 'Nieuw: maandagochtend een korte rustige run. Lukt maandag niet, doe hem dan woensdagochtend.',
+  runs: [['2027-01-04', '30 min rustig', 'easy'], ['2027-01-07', 'Testloop: 15 min inlopen, 5 km zo hard als je volhoudt, 10 min uitlopen. Noteer je tijd en hoogste hartslag.', 'test'], ['2027-01-09', '10 km rustig', 'long', 10]]
+}, {
+  s: '2027-01-11',
+  p: 3,
+  note: 'Vanaf nu ben je zaterdag langer dan anderhalf uur onderweg. Neem iets te eten mee, en drink vrijdagavond liefst niet.',
+  runs: [['2027-01-11', '30 min rustig', 'easy'], ['2027-01-14', '45 min rustig + 6 strides', 'easy'], ['2027-01-16', '14 km rustig', 'long', 14]]
+}, {
+  s: '2027-01-18',
+  p: 3,
+  runs: [['2027-01-18', '30 min rustig', 'easy'], ['2027-01-21', '10 min inlopen, 2 × 10 min stevig met 3 min rustig ertussen, 10 min uitlopen', 'tempo'], ['2027-01-23', '15 km rustig', 'long', 15]]
+}, {
+  s: '2027-01-25',
+  p: 3,
+  runs: [['2027-01-25', '35 min rustig', 'easy'], ['2027-01-28', '45 min rustig + 6 strides', 'easy'], ['2027-01-30', '16 km rustig', 'long', 16]]
+}, {
+  s: '2027-02-01',
+  p: 3,
+  tag: 'Vastenavond',
+  carnaval: true,
+  runs: [['2027-02-01', '30 min rustig', 'easy'], ['2027-02-04', '50 min rustig', 'easy'], ['2027-02-06', 'Vastenavond, geen run', 'off']]
+}, {
+  s: '2027-02-08',
+  p: 3,
+  tag: 'Vastenavond',
+  gymOff: [0, 1],
+  note: 'Maandag en dinsdag geen gym. Donderdag rustig weer opstarten.',
+  runs: [['2027-02-11', '30 min rustig', 'easy'], ['2027-02-13', '15 km rustig', 'long', 15]]
+}, {
+  s: '2027-02-15',
+  p: 3,
+  runs: [['2027-02-15', '35 min rustig', 'easy'], ['2027-02-18', '10 min inlopen, 3 × 8 min stevig met 3 min rustig ertussen, 10 min uitlopen', 'tempo'], ['2027-02-20', '17 km rustig', 'long', 17]]
+}, {
+  s: '2027-02-22',
+  p: 3,
+  tag: 'Langste loop',
+  runs: [['2027-02-22', '35 min rustig', 'easy'], ['2027-02-25', '45 min rustig + 6 strides', 'easy'], ['2027-02-27', '18 km rustig', 'long', 18]]
+}, {
+  s: '2027-03-01',
+  p: 3,
+  tag: 'Afbouwen',
+  light: true,
+  note: 'Lower lichter: minder sets, niet tot falen.',
+  runs: [['2027-03-01', '30 min rustig', 'easy'], ['2027-03-04', '10 min inlopen, 2 × 8 min stevig met 3 min rustig ertussen, 10 min uitlopen', 'tempo'], ['2027-03-06', '12 km rustig', 'long', 12]]
+}, {
+  s: '2027-03-08',
+  p: 3,
+  tag: 'Raceweek',
+  goal: true,
+  gymOff: [1],
+  note: 'Geen lower deze week. Vanaf vrijdag geen alcohol, zaterdag rust en niet stappen.',
+  runs: [['2027-03-08', '25 min rustig', 'easy'], ['2027-03-11', '25 min rustig + 4 strides', 'easy'], ['2027-03-14', 'Halve marathon Den Haag, 21,1 km', 'race', 21.1]]
+}, {
+  s: '2027-03-15',
+  p: 4,
+  tag: 'Herstel',
+  light: true,
+  note: 'De eerste dagen na Den Haag niet lopen, wandelen mag. Lower deze week licht.',
+  runs: [['2027-03-18', '25 min heel rustig', 'easy'], ['2027-03-20', '6 km rustig', 'long', 6]]
+}, {
+  s: '2027-03-22',
+  p: 4,
+  runs: [['2027-03-22', '30 min rustig', 'easy'], ['2027-03-25', '10 min inlopen, 6 × 2 min vlot met 2 min joggen ertussen, 10 min uitlopen', 'tempo'], ['2027-03-27', '9 km rustig + 4 strides', 'long', 9]]
+}, {
+  s: '2027-03-29',
+  p: 4,
+  tag: 'Raceweek',
+  goal: true,
+  gymOff: [1],
+  note: 'Geen lower deze week. Vrijdag hooguit een of twee drankjes, zaterdag niks en niet stappen.',
+  runs: [['2027-03-29', '25 min rustig', 'easy'], ['2027-04-01', '10 min inlopen, 3 × 1 min vlot met 2 min rustig ertussen, 10 min uitlopen', 'tempo'], ['2027-04-04', 'Singelloop Breda, 5 km', 'race', 5]]
+}];
+const RUN_PHASES = {
+  1: {
+    t: 'Naar 10 km',
+    when: '12 oktober tot 22 november',
+    intro: 'Twee runs per week, alles rustig. Je bouwt afstand op, tempo maakt nu niet uit.'
+  },
+  2: {
+    t: 'Basis houden',
+    when: '23 november tot 3 januari',
+    intro: 'Na je 10 km niet meteen doorknallen. De zaterdag groeit rustig naar 13 km, met de feestdagen ertussen.'
+  },
+  3: {
+    t: 'Naar de halve marathon',
+    when: '4 januari tot 14 maart',
+    intro: 'Een derde run op maandagochtend, af en toe stevig op donderdag, en de zaterdag naar 18 km. Vastenavond is je rustweek.'
+  },
+  4: {
+    t: 'Naar de Singelloop',
+    when: '15 maart tot 4 april',
+    intro: 'Eerst herstellen van de halve, dan een paar vlotte blokjes. Minder kilometers, wel wat sneller, zodat je fris en scherp aan de start staat.'
+  }
+};
+const MARATHON = [["april", "Herstellen van de Singelloop, daarna rustig weer opbouwen met 3 runs per week."], ["mei–juni", "Basis: de lange loop rustig van 12 naar 18 km, één keer per week wat vlotter. Gym nog 3 keer."], ["14 juni", "Start van de marathonvoorbereiding: 4 runs per week. Gym naar 2 keer, met een lichte lower."], ["juli–aug", "Lange duurlopen naar 25–28 km. Vrijdagavond dan droog. In de zomer vroeg lopen en genoeg water drinken."], ["begin sep", "Je langste loop: 30–32 km."], ["half sep", "Een halve marathon als test, bijvoorbeeld in Rotterdam. Check de datum voor 2027."], ["eind sep", "Afbouwen: minder kilometers, maar wel je ritme houden."], ["zo 10 okt", "Marathon Eindhoven, 42,2 km"]];
+const GOALS = [["2026-11-21", "je 10 km"], ["2027-03-14", "Den Haag"], ["2027-04-04", "de Singelloop"], ["2027-10-10", "de marathon"]];
+const RUN_HELP = [["Rustig", "Zone 2, 142–156 slagen per minuut. Tot een slag of 160 is prima zolang je hele zinnen kunt praten. Ongeveer 6:30–7:15 per km. Klopt het getal niet met hoe het voelt, dan gaat de praattest voor."], ["Strides", "Aan het eind van je run 15–20 seconden versnellen tot vlot, niet sprinten. Daarna rustig joggen of wandelen tot je weer op adem bent, en de volgende."], ["Stevig", "Zone 3, 157–170. Korte zinnen lukken nog, kletsen niet meer. Alleen in de blokjes op donderdag, nooit op zaterdag."], ["Vlot", "Ongeveer het tempo dat je 5 km zou volhouden. Dat komt pas na Den Haag, in de blokjes voor de Singelloop."], ["Testloop", "15 min inlopen, 5 km zo hard als je volhoudt, 10 min uitlopen. Noteer je tijd en hoogste hartslag. Kom je hoger uit dan 201, zet dat dan als max in je app."], ["Pijn", "Wordt het tijdens het lopen erger (scheenbeen, knie, achillespees), stop dan. Doe de week erna de vorige week nog een keer. Is het na een paar dagen niet weg, laat er dan naar kijken."], ["Run gemist", "Niet inhalen door twee dagen achter elkaar te lopen. Gewoon door met de volgende."], ["Ziek", "Met koorts loop je niet. Daarna stap je een week terug in het schema."], ["Alcohol", "Voor een wedstrijd de laatste twee avonden niks. Is je zaterdagloop 14 km of meer, drink dan vrijdag niet of nauwelijks."]];
 const REST_180 = new Set(["Leg Press"]);
 const REST_150 = new Set(["Incline Dumbbell Press", "Flat Dumbbell Press"]);
 const REST_120 = new Set(["Lat Pulldown", "Cable Row", "Shoulder Press Machine", "Hip Thrust Machine"]);
@@ -511,14 +680,19 @@ function weekCount(start, set) {
   }
   return n;
 }
+function weekTarget(ws) {
+  const w = RUNPLAN.find(x => x.s === localKey(ws));
+  if (!w || !w.gymOff) return WEEK_TARGET;
+  return Math.max(1, WEEK_TARGET - w.gymOff.filter(d => [0, 1, 3].includes(d)).length);
+}
 function calcStreak(set) {
   let s = 0;
   const ws = weekStartOf(new Date());
-  if (weekCount(ws, set) >= WEEK_TARGET) s++;
+  if (weekCount(ws, set) >= weekTarget(ws)) s++;
   for (let i = 1; i < 520; i++) {
     const w = new Date(ws);
     w.setDate(w.getDate() - 7 * i);
-    if (weekCount(w, set) >= WEEK_TARGET) s++;else break;
+    if (weekCount(w, set) >= weekTarget(w)) s++;else break;
   }
   return s;
 }
@@ -528,6 +702,163 @@ function markTrained(tk) {
     cal[tk] = true;
     lsSet("pf_cal", cal);
   }
+}
+const RUN_LIST = [];
+RUNPLAN.forEach((w, wi) => w.runs.forEach(r => RUN_LIST.push({
+  id: r[0],
+  date: r[0],
+  text: r[1],
+  kind: r[2],
+  km: r[3] || null,
+  wi
+})));
+function runMoves() {
+  return lsGet("pf_runmove", {});
+}
+function runDate(run) {
+  return runMoves()[run.id] || run.date;
+}
+function runLog(id) {
+  return lsGet("pf_run_" + id, null);
+}
+function runsOn(date) {
+  const mv = runMoves();
+  return RUN_LIST.filter(r => (mv[r.id] || r.date) === date);
+}
+function weekIdxOf(date) {
+  const k = localKey(weekStartOf(new Date(date + T12)));
+  return RUNPLAN.findIndex(w => w.s === k);
+}
+function gymOffInfo(date) {
+  const wi = weekIdxOf(date);
+  if (wi < 0) return null;
+  const w = RUNPLAN[wi];
+  const d = (new Date(date + T12).getDay() + 6) % 7;
+  return w.gymOff && w.gymOff.includes(d) ? w : null;
+}
+function runStatus(run, tk) {
+  if (run.kind === "off") return "off";
+  const l = runLog(run.id);
+  if (l && l.done) return "done";
+  if (l && l.skipped) return "skipped";
+  const d = runDate(run);
+  return d < tk ? "missed" : d === tk ? "today" : "planned";
+}
+function runsInWeek(ws) {
+  const k = localKey(ws);
+  return RUN_LIST.filter(r => r.kind !== "off" && localKey(weekStartOf(new Date(runDate(r) + T12))) === k);
+}
+const isSpecial = run => run.kind === "race" || run.kind === "goal";
+function runShort(run) {
+  if (run.kind === "off") return "geen run";
+  if (run.km) return `${fmtNum(run.km)} km`;
+  if (run.kind === "test") return "testloop";
+  if (run.kind === "tempo") return "blokjes";
+  const m = run.text.match(/(\d+)\s*min/);
+  return m ? `${m[1]} min` : "run";
+}
+function runSub(run) {
+  if (run.kind === "race") return "Wedstrijd. Start rustiger dan je wil.";
+  if (run.kind === "goal") return "Rustig tempo, het gaat om de afstand.";
+  if (run.kind === "test") return "Zo hard als je 5 km volhoudt, met inlopen en uitlopen.";
+  if (run.kind === "tempo") return /vlot/.test(run.text) ? "Vlotte blokjes op ongeveer 5 km-tempo, de rest rustig." : "Stevige blokjes in zone 3, de rest rustig.";
+  if (run.kind === "off") return "";
+  return /strides/.test(run.text) ? "Rustig in zone 2, met strides aan het eind." : "Rustig in zone 2, op praattempo.";
+}
+const fmtDur = sec => {
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600),
+    m = Math.floor(sec % 3600 / 60),
+    x = sec % 60;
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(x).padStart(2, "0")}` : `${m}:${String(x).padStart(2, "0")}`;
+};
+function parseDur(str) {
+  const p = String(str).trim().split(/[:.,]/);
+  if (!p.length || p.length > 3 || p.some(x => !/^\d+$/.test(x))) return null;
+  const n = p.map(Number);
+  let s;
+  if (n.length === 1) s = n[0] * 60;else if (n.length === 2) {
+    if (n[1] > 59) return null;
+    s = n[0] * 60 + n[1];
+  } else {
+    if (n[1] > 59 || n[2] > 59) return null;
+    s = n[0] * 3600 + n[1] * 60 + n[2];
+  }
+  return s > 0 && s < 6 * 3600 ? s : null;
+}
+function runSummary(l) {
+  if (!l) return {
+    main: "",
+    sub: ""
+  };
+  let main = "";
+  const parts = [];
+  if (l.km) main = `${fmtNum(l.km)} km`;
+  if (l.sec) main += (main ? " in " : "") + fmtDur(l.sec);
+  if (l.km && l.sec) parts.push(`${fmtDur(l.sec / l.km)} per km`);
+  if (l.hr) parts.push(`hartslag ${l.hr}`);
+  if (l.feel) parts.push(l.feel);
+  if (l.note) parts.push(l.note);
+  if (!main) {
+    main = "Gedaan";
+    if (!parts.length) parts.push("tik om details in te vullen");
+  }
+  return {
+    main,
+    sub: parts.join(", ")
+  };
+}
+const fmtDayShort = k => {
+  const d = new Date(k + T12);
+  return `${DOW[(d.getDay() + 6) % 7]} ${d.getDate()} ${MON[d.getMonth()]}`;
+};
+const fmtDayLong = k => new Date(k + T12).toLocaleDateString("nl-NL", {
+  weekday: "long",
+  day: "numeric",
+  month: "long"
+});
+function nextGoals(tk, n = 2) {
+  return GOALS.map(([d, l]) => ({
+    d,
+    l,
+    days: Math.round((new Date(d + T12) - new Date(tk + T12)) / 864e5)
+  })).filter(g => g.days > 0).slice(0, n);
+}
+const FIT = {
+  h: 0,
+  inner: 0,
+  top: 0,
+  bottom: 0,
+  standalone: false
+};
+function fitScreen() {
+  const root = document.getElementById("root");
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;left:0;top:0;width:0;visibility:hidden;pointer-events:none;height:env(safe-area-inset-top)";
+  const probeB = probe.cloneNode();
+  probeB.style.height = "env(safe-area-inset-bottom)";
+  document.body.appendChild(probe);
+  document.body.appendChild(probeB);
+  const standalone = window.navigator.standalone === true || window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+  function apply() {
+    const top = probe.offsetHeight || 0,
+      bottom = probeB.offsetHeight || 0;
+    let h = window.innerHeight;
+    const portrait = window.innerHeight >= window.innerWidth;
+    const full = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+    if (standalone && top > 0 && full > h && full - h <= 120) h = full;
+    root.style.height = h + "px";
+    Object.assign(FIT, {
+      h,
+      inner: window.innerHeight,
+      top,
+      bottom,
+      standalone
+    });
+  }
+  apply();
+  window.addEventListener("resize", apply);
+  window.addEventListener("orientationchange", () => setTimeout(apply, 350));
 }
 let _actx = null;
 function getActx() {
@@ -755,7 +1086,76 @@ const PATHS = {
   })),
   moon: React.createElement("path", {
     d: "M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"
-  })
+  }),
+  run: React.createElement(React.Fragment, null, React.createElement("circle", {
+    cx: "14.5",
+    cy: "4.5",
+    r: "1.8"
+  }), React.createElement("path", {
+    d: "M7 21l3.2-5.5L13 17v4"
+  }), React.createElement("path", {
+    d: "M5 12.5l3.2-3 4 .8 2.3 3.2 3.5 1"
+  }), React.createElement("path", {
+    d: "M10.2 15.5l2-5.2"
+  })),
+  sun: React.createElement(React.Fragment, null, React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "4"
+  }), React.createElement("line", {
+    x1: "12",
+    y1: "2",
+    x2: "12",
+    y2: "4"
+  }), React.createElement("line", {
+    x1: "12",
+    y1: "20",
+    x2: "12",
+    y2: "22"
+  }), React.createElement("line", {
+    x1: "4.9",
+    y1: "4.9",
+    x2: "6.3",
+    y2: "6.3"
+  }), React.createElement("line", {
+    x1: "17.7",
+    y1: "17.7",
+    x2: "19.1",
+    y2: "19.1"
+  }), React.createElement("line", {
+    x1: "2",
+    y1: "12",
+    x2: "4",
+    y2: "12"
+  }), React.createElement("line", {
+    x1: "20",
+    y1: "12",
+    x2: "22",
+    y2: "12"
+  }), React.createElement("line", {
+    x1: "4.9",
+    y1: "19.1",
+    x2: "6.3",
+    y2: "17.7"
+  }), React.createElement("line", {
+    x1: "17.7",
+    y1: "6.3",
+    x2: "19.1",
+    y2: "4.9"
+  })),
+  map: React.createElement(React.Fragment, null, React.createElement("polygon", {
+    points: "3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"
+  }), React.createElement("line", {
+    x1: "9",
+    y1: "3",
+    x2: "9",
+    y2: "18"
+  }), React.createElement("line", {
+    x1: "15",
+    y1: "6",
+    x2: "15",
+    y2: "21"
+  }))
 };
 function I({
   n,
@@ -897,7 +1297,7 @@ function WeekHistModal({
       marginTop: -8,
       marginBottom: 14
     }
-  }, "Doel: ", WEEK_TARGET, " trainingen per week"), React.createElement("div", {
+  }, "Doel: ", WEEK_TARGET, " trainingen per week, minder in rust- en raceweken"), React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
@@ -912,6 +1312,7 @@ function WeekHistModal({
       return localKey(d);
     });
     const cnt = days.filter(k => trained.has(k)).length;
+    const tg = weekTarget(w);
     const end = new Date(w);
     end.setDate(end.getDate() + 6);
     return React.createElement("div", {
@@ -938,9 +1339,9 @@ function WeekHistModal({
       style: {
         fontSize: 13,
         fontWeight: 600,
-        color: cnt >= WEEK_TARGET ? "#a3e635" : cnt >= 1 ? "#fb923c" : "#8b8b95"
+        color: cnt >= tg ? "#a3e635" : cnt >= 1 ? "#fb923c" : "#8b8b95"
       }
-    }, cnt, "/", WEEK_TARGET)), React.createElement("div", {
+    }, cnt, "/", tg)), React.createElement("div", {
       style: {
         display: "flex",
         gap: 5
@@ -1154,13 +1555,15 @@ function RestBar({
   })));
 }
 function TodayTab({
-  onStart
+  onStart,
+  onSchema
 }) {
   const now = new Date();
   const tk = todayKey();
   const plannedIdx = SCHEDULE[now.getDay()];
-  const isGymDay = plannedIdx !== undefined;
-  const [splitIdx, setSplitIdx] = useState(() => lsGet("pf_split_" + tk, isGymDay ? plannedIdx : 0));
+  const off = plannedIdx !== undefined ? gymOffInfo(tk) : null;
+  const isGymDay = plannedIdx !== undefined && !off;
+  const [splitIdx, setSplitIdx] = useState(() => lsGet("pf_split_" + tk, plannedIdx !== undefined ? plannedIdx : 0));
   const [restDay, setRestDay] = useState(() => lsGet("pf_rest_" + tk, !isGymDay));
   const [exDone, setExDone] = useState(() => lsGet("pf_done_" + tk, {}));
   const [supps, setSupps] = useState(() => lsGet("pf_supps_" + tk, {}));
@@ -1168,6 +1571,7 @@ function TodayTab({
   const [showBW, setShowBW] = useState(false);
   const [showWeeks, setShowWeeks] = useState(false);
   const [showDays, setShowDays] = useState(false);
+  const [runSheet, setRunSheet] = useState(null);
   const [rev, setRev] = useState(0);
   const mounted = useRef(false);
   useEffect(() => {
@@ -1195,9 +1599,17 @@ function TodayTab({
   }, [exDone]);
   const trained = useMemo(() => trainedDates(), [rev]);
   const ws = weekStartOf(now);
+  const target = weekTarget(ws);
   const weekN = weekCount(ws, trained);
   const streak = useMemo(() => calcStreak(trained), [trained]);
   const bw = lsGet("pf_bw", [])[0];
+  const todays = runsOn(tk);
+  const runsToday = todays.filter(r => r.kind !== "off");
+  const offRun = todays.find(r => r.kind === "off");
+  const wi = weekIdxOf(tk),
+    week = wi >= 0 ? RUNPLAN[wi] : null;
+  const weekRuns = runsInWeek(ws);
+  const weekRunsDone = weekRuns.filter(r => runStatus(r, tk) === "done").length;
   const day = DAYS[splitIdx],
     col = DAY_COLORS[splitIdx];
   const ids = todayIds(day, tk);
@@ -1205,17 +1617,22 @@ function TodayTab({
   const doneCount = exs.filter(e => exDone[e.id]).length;
   const firstOpen = exs.find(e => !exDone[e.id]);
   const suppCount = SUPPLEMENTS.filter(s => supps[s.id]).length;
+  const both = runsToday.length > 0 && !restDay;
   let next = null;
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    if (SCHEDULE[d.getDay()] !== undefined) {
-      next = {
-        d,
-        idx: SCHEDULE[d.getDay()]
-      };
-      break;
-    }
+  for (let i = 1; i <= 10 && !next; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i),
+      k = localKey(d);
+    const gi = SCHEDULE[d.getDay()],
+      g = gi !== undefined && !gymOffInfo(k);
+    const rs = runsOn(k).filter(r => r.kind !== "off");
+    if (g || rs.length) next = {
+      d,
+      gi: g ? gi : undefined,
+      rs
+    };
   }
+  const nextText = next ? [next.rs.length ? `run van ${next.rs.map(runShort).join(", ")}` : null, next.gi !== undefined ? DAYS[next.gi] : null].filter(Boolean).join(" en ") : "";
+  const refresh = () => setRev(r => r + 1);
   return React.createElement("div", {
     className: "fu"
   }, React.createElement("div", {
@@ -1250,62 +1667,81 @@ function TodayTab({
   }, React.createElement(I, {
     n: "flame",
     s: 14
-  }), streak > 0 ? `${streak} ${streak === 1 ? "week" : "weken"}` : `${weekN}/${WEEK_TARGET}`), React.createElement("button", {
+  }), streak > 0 ? `${streak} ${streak === 1 ? "week" : "weken"}` : `${weekN}/${target}`), React.createElement("button", {
     onClick: () => setShowBW(true),
     className: "pill"
   }, React.createElement(I, {
     n: "scale",
     s: 14
-  }), bw ? `${fmtNum(bw.w)} kg` : "gewicht"))), React.createElement("div", {
+  }), bw ? `${fmtNum(bw.w)} kg` : "gewicht"))), React.createElement(WeekStrip, {
+    tk: tk,
+    trained: trained
+  }), React.createElement("div", {
+    className: "muted",
     style: {
-      display: "flex",
-      gap: 6,
-      marginBottom: 16
+      fontSize: 12.5,
+      marginTop: 8,
+      marginBottom: 12
     }
-  }, PLAN.map(([wd, l]) => {
-    const d = new Date(ws);
-    d.setDate(d.getDate() + (wd + 6) % 7);
-    const k = localKey(d),
-      idx = SCHEDULE[wd],
-      c = DAY_COLORS[idx];
-    const ok = trained.has(k),
-      isT = k === tk,
-      past = k < tk;
-    return React.createElement("div", {
-      key: wd,
-      style: {
-        flex: 1,
-        padding: "8px 4px",
-        borderRadius: 12,
-        background: ok ? c + "16" : "transparent",
-        border: `1px solid ${isT ? c : ok ? c + "40" : "#26262d"}`,
-        textAlign: "center"
-      }
-    }, React.createElement("div", {
-      style: {
-        fontSize: 11.5,
-        color: isT || ok ? c : "#8b8b95"
-      }
-    }, l, " ", d.getDate()), React.createElement("div", {
-      className: "syne",
-      style: {
-        fontSize: 13.5,
-        color: isT || ok ? c : "#e8e8e8",
-        marginTop: 1
-      }
-    }, DAYS[idx]), React.createElement("div", {
-      style: {
-        fontSize: 11,
-        marginTop: 1,
-        color: ok ? c : past ? "#f87171" : "#6b6b75"
-      }
-    }, ok ? "gedaan" : past ? "gemist" : isT ? "vandaag" : "gepland"));
-  })), !restDay ? React.createElement("div", {
+  }, "Gym ", weekN, "/", target, weekRuns.length ? `, lopen ${weekRunsDone}/${weekRuns.length}` : "", " deze week"), week && (week.tag || week.note) && React.createElement("div", {
+    style: {
+      marginBottom: 12,
+      padding: "10px 13px",
+      borderRadius: 12,
+      background: "#121215",
+      border: "1px solid #222228",
+      fontSize: 13.5,
+      lineHeight: 1.5,
+      color: "#c4c4cc"
+    }
+  }, week.tag && React.createElement("span", {
+    style: {
+      color: week.goal ? "#fbbf24" : RUN_COLOR,
+      fontWeight: 600
+    }
+  }, week.tag, week.note ? ". " : ""), week.note || ""), runsToday.map(run => React.createElement(RunCard, {
+    key: run.id,
+    run: run,
+    tk: tk,
+    label: both ? "Ochtendrun" : "Hardlopen",
+    onChange: refresh,
+    onSheet: type => setRunSheet({
+      type,
+      run
+    }),
+    onSchema: onSchema
+  })), offRun && React.createElement("div", {
+    className: "card"
+  }, React.createElement("div", {
+    className: "lbl",
+    style: {
+      color: RUN_COLOR
+    }
+  }, "Hardlopen"), React.createElement("div", {
+    style: {
+      fontSize: 15,
+      marginTop: 6
+    }
+  }, offRun.text)), !restDay ? React.createElement("div", {
     className: "card",
     style: {
       paddingBottom: 6
     }
-  }, React.createElement("div", {
+  }, both && React.createElement("div", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12.5,
+      color: col,
+      fontWeight: 600,
+      marginBottom: 8
+    }
+  }, React.createElement(I, {
+    n: "moon",
+    s: 14,
+    c: col
+  }), "Avondtraining"), React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -1345,7 +1781,13 @@ function TodayTab({
   }, React.createElement(I, {
     n: "moon",
     s: 13
-  }), "Rustdag"))), showDays && React.createElement("div", {
+  }), "Geen gym"))), off && React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "#fb923c",
+      marginTop: 10
+    }
+  }, "Volgens je loopschema train je vandaag niet: ", off.tag ? off.tag.toLowerCase() : "rustweek", "."), showDays && React.createElement("div", {
     style: {
       display: "flex",
       gap: 6,
@@ -1427,7 +1869,37 @@ function TodayTab({
         [ex.id]: !p[ex.id]
       }))
     }));
-  }))) : React.createElement("div", {
+  }))) : plannedIdx !== undefined && off ? React.createElement("div", {
+    className: "card"
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      gap: 10
+    }
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "syne",
+    style: {
+      fontSize: 24
+    }
+  }, "Geen gym vandaag"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13.5,
+      marginTop: 4,
+      lineHeight: 1.5
+    }
+  }, "Zo staat het in je loopschema voor deze week.")), React.createElement("button", {
+    onClick: () => setRestDay(false),
+    className: "pill"
+  }, "Toch trainen"))) : runsToday.length ? runsToday.some(isSpecial) ? null : React.createElement("button", {
+    onClick: () => setRestDay(false),
+    className: "btn-ghost",
+    style: {
+      marginBottom: 12
+    }
+  }, "Toch naar de gym vandaag") : React.createElement("div", {
     className: "card"
   }, React.createElement("div", {
     style: {
@@ -1447,13 +1919,13 @@ function TodayTab({
       fontSize: 13.5,
       marginTop: 4
     }
-  }, "Volgende training: ", React.createElement("span", {
+  }, "Volgende: ", React.createElement("span", {
     style: {
-      color: DAY_COLORS[next.idx]
+      color: next.gi !== undefined ? DAY_COLORS[next.gi] : RUN_COLOR
     }
   }, next.d.toLocaleDateString("nl-NL", {
     weekday: "long"
-  }), ", ", DAYS[next.idx]))), React.createElement("button", {
+  }), ", ", nextText))), React.createElement("button", {
     onClick: () => setRestDay(false),
     className: "pill"
   }, "Toch trainen")), React.createElement("div", {
@@ -1524,7 +1996,7 @@ function TodayTab({
   }, "Notitie"), React.createElement("textarea", {
     value: note,
     onChange: e => setNote(e.target.value),
-    placeholder: restDay ? "Hoe voel je je vandaag?" : "Hoe ging de training?",
+    placeholder: restDay && !runsToday.length ? "Hoe voel je je vandaag?" : "Hoe ging het vandaag?",
     rows: 2,
     className: "inp",
     style: {
@@ -1536,11 +2008,920 @@ function TodayTab({
   })), showBW && React.createElement(BWModal, {
     onClose: () => {
       setShowBW(false);
-      setRev(r => r + 1);
+      refresh();
     }
   }), showWeeks && React.createElement(WeekHistModal, {
     onClose: () => setShowWeeks(false)
+  }), runSheet && runSheet.type === "log" && React.createElement(RunLogSheet, {
+    run: runSheet.run,
+    onClose: () => {
+      setRunSheet(null);
+      refresh();
+    }
+  }), runSheet && runSheet.type === "move" && React.createElement(MoveSheet, {
+    run: runSheet.run,
+    onClose: () => {
+      setRunSheet(null);
+      refresh();
+    }
+  }), runSheet && runSheet.type === "help" && React.createElement(HelpSheet, {
+    onClose: () => setRunSheet(null)
   }));
+}
+function WeekStrip({
+  tk,
+  trained
+}) {
+  const ws = weekStartOf(new Date(tk + T12));
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(ws);
+    d.setDate(d.getDate() + i);
+    const k = localKey(d);
+    const gi = SCHEDULE[d.getDay()],
+      gym = gi !== undefined && !gymOffInfo(k);
+    const runs = runsOn(k).filter(r => r.kind !== "off");
+    if (gym || runs.length) days.push({
+      d,
+      k,
+      gi: gym ? gi : undefined,
+      runs
+    });
+  }
+  return React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 5
+    }
+  }, days.map(x => {
+    const gymDone = x.gi !== undefined && trained.has(x.k);
+    const runsDone = x.runs.every(r => runStatus(r, tk) === "done");
+    const allDone = (x.gi === undefined || gymDone) && runsDone;
+    const isT = x.k === tk,
+      past = x.k < tk;
+    const c = x.gi !== undefined ? DAY_COLORS[x.gi] : x.runs.some(isSpecial) ? "#fbbf24" : RUN_COLOR;
+    const main = x.gi !== undefined ? DAYS[x.gi] : runShort(x.runs[0]);
+    const status = allDone ? "gedaan" : past ? "gemist" : isT ? "vandaag" : "gepland";
+    const runDone = x.runs.length && runsDone;
+    return React.createElement("div", {
+      key: x.k,
+      style: {
+        flex: 1,
+        minWidth: 0,
+        padding: "7px 3px",
+        borderRadius: 12,
+        background: allDone ? c + "16" : "transparent",
+        border: `1px solid ${isT ? c : allDone ? c + "40" : "#26262d"}`,
+        textAlign: "center"
+      }
+    }, React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: isT || allDone ? c : "#8b8b95"
+      }
+    }, DOW[(x.d.getDay() + 6) % 7], " ", x.d.getDate()), React.createElement("div", {
+      className: "syne",
+      style: {
+        fontSize: 13,
+        color: isT || allDone ? c : "#e8e8e8",
+        marginTop: 1,
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis"
+      }
+    }, main), x.gi !== undefined && x.runs.length ? React.createElement("div", {
+      style: {
+        fontSize: 11,
+        marginTop: 1,
+        color: runDone ? RUN_COLOR : past ? "#f87171" : "#8b8b95",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 3
+      }
+    }, React.createElement(I, {
+      n: "run",
+      s: 11
+    }), runShort(x.runs[0])) : React.createElement("div", {
+      style: {
+        fontSize: 11,
+        marginTop: 1,
+        color: allDone ? c : past ? "#f87171" : "#6b6b75"
+      }
+    }, status));
+  }));
+}
+function RunCard({
+  run,
+  tk,
+  label,
+  onChange,
+  onSheet,
+  onSchema
+}) {
+  const l = runLog(run.id) || {};
+  const st = runStatus(run, tk);
+  const moved = runDate(run) !== run.date;
+  const special = isSpecial(run);
+  const c = special ? "#fbbf24" : RUN_COLOR;
+  const sum = runSummary(l);
+  function quickDone() {
+    lsSet("pf_run_" + run.id, {
+      ...l,
+      done: true,
+      skipped: false,
+      savedAt: new Date().toISOString()
+    });
+    onChange();
+  }
+  function undo() {
+    lsDel("pf_run_" + run.id);
+    onChange();
+  }
+  return React.createElement("div", {
+    className: "card",
+    style: {
+      borderColor: c + "55"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 8
+    }
+  }, React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 12.5,
+      color: c,
+      fontWeight: 600
+    }
+  }, React.createElement(I, {
+    n: special ? "trophy" : "run",
+    s: 15,
+    c: c
+  }), label), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, React.createElement("button", {
+    onClick: () => onSheet("help"),
+    className: "pill",
+    style: {
+      padding: "5px 10px"
+    }
+  }, "Uitleg"), React.createElement("button", {
+    onClick: onSchema,
+    className: "pill",
+    style: {
+      padding: "5px 10px"
+    }
+  }, React.createElement(I, {
+    n: "map",
+    s: 13
+  }), "Schema"))), React.createElement("div", {
+    className: "syne",
+    style: {
+      fontSize: 22,
+      lineHeight: 1.2,
+      marginTop: 8
+    }
+  }, run.text), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13.5,
+      marginTop: 3,
+      lineHeight: 1.45
+    }
+  }, runSub(run), moved ? ` Verplaatst van ${fmtDayShort(run.date)}.` : ""), st === "done" ? React.createElement("button", {
+    onClick: () => onSheet("log"),
+    style: {
+      width: "100%",
+      marginTop: 12,
+      padding: "10px 12px",
+      borderRadius: 12,
+      background: c + "14",
+      border: `1px solid ${c}45`,
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      textAlign: "left"
+    }
+  }, React.createElement("span", {
+    style: {
+      width: 26,
+      height: 26,
+      borderRadius: "50%",
+      background: c,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, React.createElement(I, {
+    n: "check",
+    s: 15,
+    c: "#0a0a0c",
+    w: 3
+  })), React.createElement("span", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("span", {
+    style: {
+      display: "block",
+      fontSize: 15
+    }
+  }, sum.main), sum.sub && React.createElement("span", {
+    style: {
+      display: "block",
+      fontSize: 12.5,
+      color: special ? "#fde68a" : "#99f6e4",
+      marginTop: 1
+    }
+  }, sum.sub)), React.createElement(I, {
+    n: "edit",
+    s: 15,
+    c: "#8b8b95"
+  })) : st === "skipped" ? React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 12,
+      gap: 8
+    }
+  }, React.createElement("span", {
+    className: "muted",
+    style: {
+      fontSize: 14
+    }
+  }, "Overgeslagen"), React.createElement("button", {
+    onClick: undo,
+    className: "pill"
+  }, "Ongedaan maken")) : React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginTop: 12
+    }
+  }, React.createElement("button", {
+    onClick: quickDone,
+    className: "btn-primary",
+    style: {
+      flex: 2,
+      height: 46,
+      background: c,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7
+    }
+  }, React.createElement(I, {
+    n: "check",
+    s: 16,
+    c: "#0a0a0c",
+    w: 3
+  }), "Gedaan"), React.createElement("button", {
+    onClick: () => onSheet("log"),
+    className: "btn-ghost",
+    style: {
+      flex: 1.25,
+      height: 46,
+      fontSize: 13.5,
+      padding: 0
+    }
+  }, "Invullen"), React.createElement("button", {
+    onClick: () => onSheet("move"),
+    className: "btn-ghost",
+    style: {
+      flex: 1.45,
+      height: 46,
+      fontSize: 13.5,
+      padding: 0
+    }
+  }, "Verplaatsen")));
+}
+function RunLogSheet({
+  run,
+  onClose
+}) {
+  const l = runLog(run.id) || {};
+  const [km, setKm] = useState(l.km ? fmtNum(l.km) : "");
+  const [t, setT] = useState(l.sec ? fmtDur(l.sec) : "");
+  const [hr, setHr] = useState(l.hr ? String(l.hr) : "");
+  const [feel, setFeel] = useState(l.feel || null);
+  const [note, setNote] = useState(l.note || "");
+  const [err, setErr] = useState("");
+  const c = isSpecial(run) ? "#fbbf24" : RUN_COLOR;
+  function save() {
+    const o = {
+      done: true,
+      savedAt: new Date().toISOString()
+    };
+    const k = km.trim(),
+      tt = t.trim(),
+      h = hr.trim();
+    if (k) {
+      const v = num(k);
+      if (!(v > 0 && v < 100) || !/^\d+([.,]\d+)?$/.test(k)) {
+        setErr("Afstand klopt niet. Vul bijvoorbeeld 4,6 in.");
+        return;
+      }
+      o.km = Math.round(v * 100) / 100;
+    }
+    if (tt) {
+      const sec = parseDur(tt);
+      if (sec == null) {
+        setErr("Tijd klopt niet. Vul minuten en seconden in, bijvoorbeeld 31.10.");
+        return;
+      }
+      o.sec = sec;
+    }
+    if (h) {
+      if (!/^\d{2,3}$/.test(h) || +h < 60 || +h > 230) {
+        setErr("Hartslag klopt niet. Vul je gemiddelde in, bijvoorbeeld 149.");
+        return;
+      }
+      o.hr = +h;
+    }
+    if (feel) o.feel = feel;
+    if (note.trim()) o.note = note.trim().slice(0, 200);
+    lsSet("pf_run_" + run.id, o);
+    onClose();
+  }
+  function clear() {
+    lsDel("pf_run_" + run.id);
+    onClose();
+  }
+  const onEdit = f => e => {
+    f(e.target.value);
+    setErr("");
+  };
+  return React.createElement(Sheet, {
+    onClose: onClose,
+    title: "Run invullen"
+  }, React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13.5,
+      marginTop: -8,
+      marginBottom: 14
+    }
+  }, cap(fmtDayLong(runDate(run))), ": ", run.text), React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3,minmax(0,1fr))",
+      gap: 8
+    }
+  }, React.createElement("label", {
+    className: "fl"
+  }, "Afstand (km)", React.createElement("input", {
+    value: km,
+    onChange: onEdit(setKm),
+    inputMode: "decimal",
+    placeholder: run.km ? fmtNum(run.km) : "4,6",
+    className: "inp set-inp"
+  })), React.createElement("label", {
+    className: "fl"
+  }, "Tijd", React.createElement("input", {
+    value: t,
+    onChange: onEdit(setT),
+    inputMode: "decimal",
+    placeholder: "31.10",
+    className: "inp set-inp"
+  })), React.createElement("label", {
+    className: "fl"
+  }, "Hartslag", React.createElement("input", {
+    value: hr,
+    onChange: onEdit(setHr),
+    inputMode: "numeric",
+    placeholder: "gem.",
+    className: "inp set-inp"
+  }))), React.createElement("div", {
+    className: "lbl",
+    style: {
+      marginTop: 14,
+      marginBottom: 8
+    }
+  }, "Hoe voelde het?"), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, ["makkelijk", "goed", "zwaar"].map(f => React.createElement("button", {
+    key: f,
+    onClick: () => setFeel(feel === f ? null : f),
+    className: "pill",
+    style: {
+      padding: "8px 14px",
+      fontSize: 13.5,
+      ...(feel === f ? {
+        background: "#e8e8e8",
+        color: "#0a0a0c",
+        borderColor: "#e8e8e8"
+      } : {})
+    }
+  }, cap(f)))), React.createElement("input", {
+    value: note,
+    onChange: e => setNote(e.target.value),
+    placeholder: "Notitie, zoals kuiten iets stijf",
+    maxLength: 200,
+    className: "inp",
+    style: {
+      marginTop: 14
+    }
+  }), err && React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "#f87171",
+      marginTop: 10
+    }
+  }, err), React.createElement("button", {
+    onClick: save,
+    className: "btn-primary",
+    style: {
+      background: c,
+      marginTop: 14
+    }
+  }, "Opslaan"), (l.done || l.skipped) && React.createElement("button", {
+    onClick: clear,
+    className: "btn-ghost",
+    style: {
+      marginTop: 8
+    }
+  }, "Wissen"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 12.5,
+      textAlign: "center",
+      marginTop: 10
+    }
+  }, "Alleen afvinken kan ook, de rest is optioneel."));
+}
+function MoveSheet({
+  run,
+  onClose
+}) {
+  const tk = todayKey();
+  const cur = runDate(run);
+  const ws = weekStartOf(new Date(run.date + T12));
+  const days = Array.from({
+    length: 7
+  }, (_, i) => {
+    const d = new Date(ws);
+    d.setDate(d.getDate() + i);
+    return localKey(d);
+  });
+  const busy = k => runsOn(k).some(r => r.id !== run.id && r.kind !== "off");
+  const near = k => {
+    const d = new Date(k + T12),
+      a = new Date(d),
+      b = new Date(d);
+    a.setDate(d.getDate() - 1);
+    b.setDate(d.getDate() + 1);
+    return busy(localKey(a)) || busy(localKey(b));
+  };
+  const l = runLog(run.id) || {};
+  function moveTo(k) {
+    const mv = runMoves();
+    if (k === run.date) delete mv[run.id];else mv[run.id] = k;
+    lsSet("pf_runmove", mv);
+    onClose();
+  }
+  function skip() {
+    lsSet("pf_run_" + run.id, {
+      skipped: true,
+      savedAt: new Date().toISOString()
+    });
+    onClose();
+  }
+  return React.createElement(Sheet, {
+    onClose: onClose,
+    title: "Run verplaatsen"
+  }, React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13.5,
+      marginTop: -8,
+      marginBottom: 6
+    }
+  }, run.text), days.map(k => {
+    const b = busy(k),
+      isCur = k === cur;
+    return React.createElement("button", {
+      key: k,
+      disabled: b,
+      onClick: () => moveTo(k),
+      className: "row",
+      style: {
+        width: "100%",
+        textAlign: "left",
+        opacity: b ? .4 : 1
+      }
+    }, React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      style: {
+        fontSize: 15,
+        fontWeight: 600,
+        color: isCur ? RUN_COLOR : "#e8e8e8"
+      }
+    }, cap(fmtDayLong(k))), React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        color: !b && near(k) ? "#fb923c" : "#8b8b95"
+      }
+    }, b ? "daar staat al een run" : k === run.date ? "oorspronkelijke dag" : near(k) ? "let op: dan loop je twee dagen achter elkaar" : k < tk ? "al geweest, alleen om in te vullen" : "")), isCur && React.createElement(I, {
+      n: "check",
+      s: 18,
+      c: RUN_COLOR,
+      w: 3
+    }));
+  }), !l.skipped && !l.done && React.createElement("button", {
+    onClick: skip,
+    className: "btn-ghost",
+    style: {
+      marginTop: 14
+    }
+  }, "Deze run overslaan"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 12.5,
+      marginTop: 10,
+      lineHeight: 1.5
+    }
+  }, "Een gemiste run haal je niet in door twee dagen achter elkaar te lopen. Ga gewoon door met de volgende."));
+}
+function HelpSheet({
+  onClose
+}) {
+  return React.createElement(Sheet, {
+    onClose: onClose,
+    title: "Zo loop je de runs"
+  }, RUN_HELP.map(([t, d], i) => React.createElement("div", {
+    key: t,
+    className: "row",
+    style: {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: 3,
+      borderTop: i ? undefined : "none"
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 14.5,
+      fontWeight: 600
+    }
+  }, t), React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: "#c4c4cc",
+      lineHeight: 1.55
+    }
+  }, d))));
+}
+function RunPlanView({
+  onBack
+}) {
+  const tk = todayKey();
+  const [sheet, setSheet] = useState(null);
+  const [, setRev] = useState(0);
+  const curRef = useRef(null);
+  const curWi = weekIdxOf(tk);
+  useEffect(() => {
+    const el = curRef.current;
+    if (el) {
+      const p = el.closest(".page");
+      if (p) p.scrollTop = Math.max(0, el.offsetTop - 90);
+    }
+  }, []);
+  const goals = nextGoals(tk, 2);
+  function statusEl(run) {
+    const st = runStatus(run, tk);
+    if (st === "done") return React.createElement(I, {
+      n: "check",
+      s: 17,
+      c: isSpecial(run) ? "#fbbf24" : RUN_COLOR,
+      w: 3
+    });
+    if (st === "missed") return React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "#f87171"
+      }
+    }, "gemist");
+    if (st === "skipped") return React.createElement("span", {
+      className: "muted",
+      style: {
+        fontSize: 12
+      }
+    }, "overgeslagen");
+    if (st === "today") return React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: RUN_COLOR
+      }
+    }, "vandaag");
+    return null;
+  }
+  return React.createElement("div", {
+    className: "fu"
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10
+    }
+  }, React.createElement("button", {
+    onClick: onBack,
+    className: "pill",
+    style: {
+      border: "none",
+      paddingLeft: 0,
+      fontSize: 14
+    }
+  }, React.createElement(I, {
+    n: "left",
+    s: 18
+  }), "Terug"), React.createElement("button", {
+    onClick: () => setSheet({
+      type: "help"
+    }),
+    className: "pill"
+  }, "Uitleg")), React.createElement("div", {
+    className: "h1"
+  }, "Loopschema"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13.5,
+      marginTop: 4,
+      lineHeight: 1.5
+    }
+  }, "10 km op 21 november, Den Haag op 14 maart, de Singelloop op 4 april en Eindhoven op 10 oktober."), goals.length > 0 && React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: RUN_COLOR,
+      marginTop: 6
+    }
+  }, goals.map(g => `Nog ${g.days} dagen tot ${g.l}.`).join(" ")), [1, 2, 3, 4].map(p => {
+    const P = RUN_PHASES[p];
+    return React.createElement("div", {
+      key: p,
+      style: {
+        marginTop: 24
+      }
+    }, React.createElement("div", {
+      className: "h2"
+    }, P.t), React.createElement("div", {
+      className: "muted",
+      style: {
+        fontSize: 13,
+        marginTop: 2
+      }
+    }, P.when), React.createElement("div", {
+      style: {
+        fontSize: 14,
+        color: "#c4c4cc",
+        lineHeight: 1.5,
+        margin: "6px 0 10px"
+      }
+    }, P.intro), RUNPLAN.map((w, wi) => {
+      if (w.p !== p) return null;
+      const en = new Date(w.s + T12);
+      en.setDate(en.getDate() + 6);
+      const isCur = wi === curWi,
+        past = localKey(en) < tk;
+      const runs = RUN_LIST.filter(r => r.wi === wi);
+      return React.createElement("div", {
+        key: w.s,
+        ref: isCur ? curRef : null,
+        className: "card",
+        style: {
+          padding: "12px 14px",
+          marginBottom: 8,
+          borderColor: isCur ? RUN_COLOR + "90" : undefined,
+          opacity: past ? .78 : 1
+        }
+      }, React.createElement("div", {
+        style: {
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "baseline",
+          gap: "2px 10px",
+          marginBottom: 4
+        }
+      }, React.createElement("span", {
+        className: "syne",
+        style: {
+          fontSize: 15
+        }
+      }, fmtDate(w.s), " \u2013 ", fmtDate(localKey(en))), isCur && React.createElement("span", {
+        style: {
+          fontSize: 12.5,
+          color: RUN_COLOR,
+          fontWeight: 600
+        }
+      }, "deze week"), w.tag && React.createElement("span", {
+        style: {
+          fontSize: 12.5,
+          color: w.goal ? "#fbbf24" : "#8b8b95",
+          fontWeight: w.goal ? 600 : 400
+        }
+      }, w.tag)), runs.map(r => React.createElement("button", {
+        key: r.id,
+        onClick: () => r.kind !== "off" && setSheet({
+          type: "log",
+          run: r
+        }),
+        style: {
+          width: "100%",
+          display: "grid",
+          gridTemplateColumns: "66px minmax(0,1fr) auto",
+          gap: 10,
+          alignItems: "start",
+          padding: "6px 0",
+          textAlign: "left"
+        }
+      }, React.createElement("span", {
+        className: "muted",
+        style: {
+          fontSize: 13,
+          fontWeight: 600,
+          whiteSpace: "nowrap"
+        }
+      }, fmtDayShort(runDate(r))), React.createElement("span", {
+        style: {
+          fontSize: 14,
+          lineHeight: 1.45,
+          color: isSpecial(r) ? "#fbbf24" : r.kind === "off" ? "#8b8b95" : "#e8e8e8",
+          fontWeight: isSpecial(r) ? 600 : 400
+        }
+      }, r.text, runDate(r) !== r.date && React.createElement("span", {
+        className: "muted",
+        style: {
+          fontSize: 12,
+          fontWeight: 400
+        }
+      }, " (verplaatst)")), statusEl(r))), w.note && React.createElement("div", {
+        className: "muted",
+        style: {
+          fontSize: 12.5,
+          marginTop: 4,
+          lineHeight: 1.5
+        }
+      }, w.note));
+    }));
+  }), React.createElement("div", {
+    style: {
+      marginTop: 24
+    }
+  }, React.createElement("div", {
+    className: "h2"
+  }, "Daarna: marathon Eindhoven"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13,
+      marginTop: 2,
+      marginBottom: 10
+    }
+  }, "5 april tot 10 oktober 2027, in grote lijnen"), React.createElement("div", {
+    className: "card",
+    style: {
+      padding: "4px 14px"
+    }
+  }, MARATHON.map(([d, t], i) => React.createElement("div", {
+    key: d,
+    className: "row",
+    style: {
+      alignItems: "flex-start",
+      borderTop: i ? undefined : "none"
+    }
+  }, React.createElement("span", {
+    className: "muted",
+    style: {
+      width: 74,
+      flexShrink: 0,
+      fontSize: 13,
+      fontWeight: 600
+    }
+  }, d), React.createElement("span", {
+    style: {
+      fontSize: 14,
+      lineHeight: 1.5,
+      color: i === MARATHON.length - 1 ? "#fbbf24" : "#e8e8e8"
+    }
+  }, t))))), sheet && sheet.type === "log" && React.createElement(RunLogSheet, {
+    run: sheet.run,
+    onClose: () => {
+      setSheet(null);
+      setRev(r => r + 1);
+    }
+  }), sheet && sheet.type === "help" && React.createElement(HelpSheet, {
+    onClose: () => setSheet(null)
+  }));
+}
+function RunningCard({
+  onSchema
+}) {
+  const tk = todayKey();
+  const ws0 = weekStartOf(new Date());
+  const kmIn = ws => runsInWeek(ws).reduce((a, r) => {
+    const l = runLog(r.id);
+    return a + (l && l.done && l.km ? l.km : 0);
+  }, 0);
+  const weeks = Array.from({
+    length: 8
+  }, (_, i) => {
+    const w = new Date(ws0);
+    w.setDate(w.getDate() - 7 * (7 - i));
+    return {
+      w,
+      km: kmIn(w)
+    };
+  });
+  const cur = weeks[7].km,
+    mx = Math.max(1, ...weeks.map(x => x.km));
+  const thisWeek = runsInWeek(ws0);
+  const done = thisWeek.filter(r => runStatus(r, tk) === "done").length;
+  const goals = nextGoals(tk, 2);
+  return React.createElement("div", {
+    className: "card"
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start"
+    }
+  }, React.createElement("div", null, React.createElement("div", {
+    className: "lbl"
+  }, "Hardlopen deze week"), React.createElement("div", {
+    className: "syne",
+    style: {
+      fontSize: 30,
+      color: RUN_COLOR,
+      marginTop: 4
+    }
+  }, fmtNum(cur.toFixed(1)), " km"), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 13
+    }
+  }, done, "/", thisWeek.length, " runs gedaan")), React.createElement("button", {
+    onClick: onSchema,
+    className: "pill",
+    style: {
+      color: RUN_COLOR,
+      borderColor: RUN_COLOR + "55"
+    }
+  }, React.createElement(I, {
+    n: "map",
+    s: 13
+  }), "Schema")), React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-end",
+      gap: 6,
+      height: 62,
+      marginTop: 14
+    }
+  }, weeks.map((x, i) => React.createElement("div", {
+    key: i,
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 4
+    }
+  }, React.createElement("div", {
+    style: {
+      width: "100%",
+      height: x.km ? 8 + x.km / mx * 36 : 4,
+      borderRadius: 6,
+      background: i === 7 ? RUN_COLOR : x.km ? RUN_COLOR + "55" : "#26262d"
+    }
+  }), React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      color: "#8b8b95"
+    }
+  }, x.w.getDate(), "/", x.w.getMonth() + 1)))), goals.length > 0 && React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: "#c4c4cc",
+      marginTop: 12
+    }
+  }, goals.map(g => `Nog ${g.days} dagen tot ${g.l}.`).join(" ")));
 }
 function initialRows(ex, prev, target) {
   const saved = getTodaySets(ex.id);
@@ -2452,7 +3833,9 @@ function NoteSheet({
     }
   }, "Opslaan"));
 }
-function ProgressTab() {
+function ProgressTab({
+  onSchema
+}) {
   const [showBW, setShowBW] = useState(false);
   const [rev, setRev] = useState(0);
   const bwHist = lsGet("pf_bw", []);
@@ -2496,7 +3879,9 @@ function ProgressTab() {
     style: {
       marginBottom: 14
     }
-  }, "Voortgang"), React.createElement("div", {
+  }, "Voortgang"), React.createElement(RunningCard, {
+    onSchema: onSchema
+  }), React.createElement("div", {
     className: "card"
   }, React.createElement("div", {
     style: {
@@ -2657,7 +4042,15 @@ function ProgressTab() {
       fontSize: 16,
       color: MUSCLE_COLORS[ex.muscle] || "#e8e8e8"
     }
-  }, fmtNum(ex.pr), " kg")))), React.createElement(BackupCard, null), showBW && React.createElement(BWModal, {
+  }, fmtNum(ex.pr), " kg")))), React.createElement(BackupCard, null), React.createElement("div", {
+    className: "muted",
+    style: {
+      fontSize: 11.5,
+      textAlign: "center",
+      lineHeight: 1.6,
+      marginTop: 4
+    }
+  }, "Pim Fit 3.1", React.createElement("br", null), "scherm ", screen.width, "\xD7", screen.height, ", app ", FIT.h, ", venster ", FIT.inner, ", boven ", FIT.top, ", onder ", FIT.bottom, ", ", FIT.standalone ? "app-modus" : "browser"), showBW && React.createElement(BWModal, {
     onClose: () => {
       setShowBW(false);
       setRev(r => r + 1);
@@ -2707,6 +4100,10 @@ function CalendarCard() {
       if (!dayMuscles[h.date].includes(ex.muscle)) dayMuscles[h.date].push(ex.muscle);
     });
   });
+  const runDays = new Set(RUN_LIST.filter(r => {
+    const l = runLog(r.id);
+    return l && l.done;
+  }).map(runDate));
   let trainedCount = 0,
     planned = 0;
   for (let i = 1; i <= dim; i++) {
@@ -2778,6 +4175,7 @@ function CalendarCard() {
     const isToday = ds === todayStr,
       isFuture = ds > todayStr;
     const ms = dayMuscles[ds] || [];
+    const ran = runDays.has(ds);
     return React.createElement("button", {
       key: ds,
       onClick: () => toggle(ds),
@@ -2799,12 +4197,12 @@ function CalendarCard() {
         color: isToday ? "#a3e635" : trained ? "#e8e8e8" : "#8b8b95",
         fontWeight: isToday ? 700 : 400
       }
-    }, day), trained && React.createElement("div", {
+    }, day), (trained || ran) && React.createElement("div", {
       style: {
         display: "flex",
         gap: 2
       }
-    }, (ms.length ? ms.slice(0, 3) : ["x"]).map(m => React.createElement("div", {
+    }, trained && (ms.length ? ms.slice(0, 3) : ["x"]).map(m => React.createElement("div", {
       key: m,
       style: {
         width: 4,
@@ -2812,7 +4210,14 @@ function CalendarCard() {
         borderRadius: "50%",
         background: MUSCLE_COLORS[m] || "#a3e635"
       }
-    }))));
+    })), ran && React.createElement("div", {
+      style: {
+        width: 4,
+        height: 4,
+        borderRadius: "50%",
+        background: RUN_COLOR
+      }
+    })));
   })), React.createElement("div", {
     style: {
       marginTop: 12,
@@ -2822,7 +4227,10 @@ function CalendarCard() {
     }
   }, React.createElement("div", {
     className: "muted"
-  }, trainedCount, " ", trainedCount === 1 ? "training" : "trainingen"), React.createElement("div", {
+  }, trainedCount, " ", trainedCount === 1 ? "training" : "trainingen", (() => {
+    const n = [...runDays].filter(d => d.startsWith(moStr)).length;
+    return n ? `, ${n} ${n === 1 ? "run" : "runs"}` : "";
+  })()), React.createElement("div", {
     style: {
       color: planned && trainedCount >= planned ? "#a3e635" : "#8b8b95"
     }
@@ -2991,7 +4399,15 @@ function NotesTab() {
       });
     }
   }
-  notes.sort((a, b) => b.date.localeCompare(a.date));
+  RUN_LIST.forEach(r => {
+    const l = runLog(r.id);
+    if (l && l.note) notes.push({
+      date: runDate(r),
+      text: l.note,
+      run: r
+    });
+  });
+  notes.sort((a, b) => b.date.localeCompare(a.date) || (a.run ? 1 : -1));
   const exNotes = Object.values(lsGet("pf_exnote", {})).sort((a, b) => a.name.localeCompare(b.name));
   const today = todayKey();
   const allEx = lsGet("pf_ex", {});
@@ -3066,9 +4482,12 @@ function NotesTab() {
       padding: "20px 0"
     }
   }, "Nog geen notities. Schrijf iets na je training.")) : notes.map(n => {
-    const label = getWorkoutLabel(n.date);
+    const label = n.run ? {
+      text: "Hardlopen",
+      color: RUN_COLOR
+    } : getWorkoutLabel(n.date);
     return React.createElement("div", {
-      key: n.date,
+      key: (n.run ? "r" : "d") + n.date,
       className: "card"
     }, React.createElement("div", {
       style: {
@@ -3123,6 +4542,7 @@ const TABS = [{
 }];
 function App() {
   const [tab, setTab] = useState("today");
+  const [view, setView] = useState(null);
   const [training, setTraining] = useState(() => {
     const t = lsGet("pf_training", null);
     return t && t.date === todayKey() ? t : null;
@@ -3141,7 +4561,7 @@ function App() {
     className: "app-shell"
   }, React.createElement("div", {
     className: "page",
-    key: training ? "training" : tab
+    key: training ? "training" : view || tab
   }, training ? React.createElement(TrainingMode, {
     dayIdx: training.dayIdx,
     startId: training.id,
@@ -3155,16 +4575,21 @@ function App() {
       total: sec,
       name
     })
+  }) : view === "schema" ? React.createElement(RunPlanView, {
+    onBack: () => setView(null)
   }) : tab === "today" ? React.createElement(TodayTab, {
     onStart: (dayIdx, id) => setTraining({
       dayIdx,
       id,
       date: todayKey()
-    })
-  }) : tab === "progress" ? React.createElement(ProgressTab, null) : React.createElement(NotesTab, null)), React.createElement(RestBar, {
+    }),
+    onSchema: () => setView("schema")
+  }) : tab === "progress" ? React.createElement(ProgressTab, {
+    onSchema: () => setView("schema")
+  }) : React.createElement(NotesTab, null)), React.createElement(RestBar, {
     rest: rest,
     setRest: setRest
-  }), !training && React.createElement("div", {
+  }), !training && !view && React.createElement("div", {
     className: "tabbar"
   }, TABS.map(t => React.createElement("button", {
     key: t.id,
@@ -3183,6 +4608,7 @@ function App() {
     }
   }, t.label)))));
 }
+fitScreen();
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App, null));
 }
 </script>
