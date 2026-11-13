@@ -257,12 +257,95 @@ function runSummary(l){
   if(l.hr)parts.push(`hartslag ${l.hr}`);
   if(l.feel)parts.push(l.feel);
   if(l.note)parts.push(l.note);
+  if(l.strava)parts.push("via Strava");
   if(!main){main="Gedaan";if(!parts.length)parts.push("tik om details in te vullen")}
   return{main,sub:parts.join(", ")};
 }
 const fmtDayShort=k=>{const d=new Date(k+T12);return`${DOW[(d.getDay()+6)%7]} ${d.getDate()} ${MON[d.getMonth()]}`};
 const fmtDayLong=k=>new Date(k+T12).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});
 function nextGoals(tk,n=2){return GOALS.map(([d,l])=>({d,l,days:Math.round((new Date(d+T12)-new Date(tk+T12))/864e5)})).filter(g=>g.days>0).slice(0,n)}
+
+// ─── STRAVA ───────────────────────────────────────────────────────────────────
+// pf_strava bevat de sleutel en gaat bewust niet mee in de back-up. Runs staan in pf_strava_runs (per Strava-id).
+const STRAVA_COLOR="#fc4c02";
+const STRAVA_FROM="2026-09-01";
+const STRAVA_ERR={
+  offline:"Geen verbinding met Pim Fit online. Probeer het later nog eens.",
+  auth:"Strava heeft de koppeling ingetrokken. Koppel opnieuw.",
+  limiet:"Strava krijgt even te veel verzoeken. Probeer het over een kwartier.",
+  instellingen:"De Strava-sleutels staan nog niet in Netlify.",
+  strava:"Strava gaf een fout. Probeer het later nog eens.",
+  geweigerd:"Je hebt op Strava geen toestemming gegeven.",
+  verlopen:"Het koppelen duurde te lang. Probeer het opnieuw.",
+  rechten:"Zet bij Strava het vinkje voor je activiteiten aan, anders kan Pim Fit je runs niet zien.",
+  token:"Koppelen lukte niet. Probeer het opnieuw.",
+};
+let STRAVA_FLASH=null;
+let stravaBusy=null;
+function stravaAuth(){return lsGet("pf_strava",null)}
+function stravaRuns(){return Object.values(lsGet("pf_strava_runs",{})).sort((a,b)=>b.start.localeCompare(a.start))}
+function stravaLinked(){const s=new Set();RUN_LIST.forEach(r=>{const l=runLog(r.id);if(l&&l.strava)s.add(l.strava)});return s}
+function stravaExtras(){const linked=stravaLinked();return stravaRuns().filter(s=>!linked.has(s.id))}
+function stravaLine(s){return[s.km&&s.sec?`${fmtDur(s.sec/s.km)} per km`:"",s.hr?`hartslag ${s.hr}`:""].filter(Boolean).join(", ")}
+
+// Na terugkomst van Strava staat de uitkomst in het adres achter #. Opslaan en het adres weer schoonmaken.
+function readStravaHash(){
+  const h=location.hash;
+  if(!h.startsWith("#strava"))return;
+  const p=new URLSearchParams(h.slice(1));
+  history.replaceState(null,"",location.pathname+location.search);
+  if(p.get("strava")){
+    try{const d=JSON.parse(p.get("strava"));if(d&&d.refresh_token){lsSet("pf_strava",{refresh_token:d.refresh_token,athlete:d.athlete||null,name:d.name||"",connectedAt:Date.now()});STRAVA_FLASH="ok";return}}catch{}
+    STRAVA_FLASH="token";
+  }else STRAVA_FLASH=p.get("strava-fout")||"token";
+}
+
+// Een nieuwe Strava-run vinkt de geplande run van die dag af en vult lege velden aan. Wat je zelf invulde blijft staan.
+function matchStrava(runs){
+  const seen=new Set(lsGet("pf_strava_seen",[]));
+  runs.filter(s=>!seen.has(s.id)).sort((a,b)=>a.start.localeCompare(b.start)).forEach(s=>{
+    seen.add(s.id);
+    const plan=RUN_LIST.find(r=>{if(r.kind==="off"||runDate(r)!==s.date)return false;const l=runLog(r.id);return !l||(l.done&&!l.strava)});
+    if(!plan)return;
+    const l=runLog(plan.id)||{};
+    const o={...l,done:true,strava:s.id,savedAt:l.savedAt||new Date().toISOString()};
+    if(!o.km&&s.km)o.km=s.km;
+    if(!o.sec&&s.sec)o.sec=s.sec;
+    if(!o.hr&&s.hr)o.hr=s.hr;
+    lsSet("pf_run_"+plan.id,o);
+  });
+  lsSet("pf_strava_seen",[...seen]);
+}
+
+function syncStrava(force){
+  const a=stravaAuth();
+  if(!a)return Promise.resolve({ok:false,error:"niet"});
+  if(!force&&a.lastSync&&Date.now()-a.lastSync<10*60*1000)return Promise.resolve({ok:true,added:0});
+  if(stravaBusy)return stravaBusy;
+  stravaBusy=(async()=>{
+    const runs=lsGet("pf_strava_runs",{});
+    const latest=Object.values(runs).reduce((m,r)=>r.start>m?r.start:m,"");
+    const from=new Date((latest?latest.slice(0,10):STRAVA_FROM)+T12);
+    if(latest)from.setDate(from.getDate()-3);
+    let res,data=null;
+    try{
+      res=await fetch("/.netlify/functions/strava-sync",{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json"},body:JSON.stringify({refresh_token:a.refresh_token,after:Math.floor(from.getTime()/1000)})});
+      data=await res.json().catch(()=>null);
+    }catch{return{ok:false,error:"offline"}}
+    const cur=stravaAuth();
+    if(!cur)return{ok:false,error:"niet"};
+    if(data&&data.refresh_token)cur.refresh_token=data.refresh_token;
+    if(!res.ok||!data||!Array.isArray(data.runs)){cur.error=(data&&data.error)||"strava";lsSet("pf_strava",cur);return{ok:false,error:cur.error}}
+    const before=new Set(Object.keys(runs));
+    data.runs.forEach(r=>{runs[r.id]=r});
+    lsSet("pf_strava_runs",runs);
+    matchStrava(Object.values(runs));
+    cur.lastSync=Date.now();delete cur.error;
+    lsSet("pf_strava",cur);
+    return{ok:true,added:data.runs.filter(r=>!before.has(r.id)).length};
+  })().finally(()=>{stravaBusy=null;window.dispatchEvent(new Event("pf-strava"))});
+  return stravaBusy;
+}
 
 // ─── SCHERMHOOGTE (iPhone) ────────────────────────────────────────────────────
 // iOS geeft in app-modus soms alleen het "veilige" deel van het scherm door. Dan vullen we zelf de volle hoogte.
@@ -522,6 +605,7 @@ function TodayTab({onStart,onSchema}){
       </div>}
 
       {runsToday.map(run=><RunCard key={run.id} run={run} tk={tk} label={both?"Ochtendrun":"Hardlopen"} onChange={refresh} onSheet={type=>setRunSheet({type,run})} onSchema={onSchema}/>)}
+      {stravaExtras().filter(s=>s.date===tk).map(s=><StravaRunCard key={s.id} s={s}/>)}
       {offRun&&<div className="card"><div className="lbl" style={{color:RUN_COLOR}}>Hardlopen</div><div style={{fontSize:15,marginTop:6}}>{offRun.text}</div></div>}
 
       {!restDay?(
@@ -708,6 +792,7 @@ function RunLogSheet({run,onClose}){
   const c=isSpecial(run)?"#fbbf24":RUN_COLOR;
   function save(){
     const o={done:true,savedAt:new Date().toISOString()};
+    if(l.strava)o.strava=l.strava;
     const k=km.trim(),tt=t.trim(),h=hr.trim();
     if(k){const v=num(k);if(!(v>0&&v<100)||!/^\d+([.,]\d+)?$/.test(k)){setErr("Afstand klopt niet. Vul bijvoorbeeld 4,6 in.");return}o.km=Math.round(v*100)/100}
     if(tt){const sec=parseDur(tt);if(sec==null){setErr("Tijd klopt niet. Vul minuten en seconden in, bijvoorbeeld 31.10.");return}o.sec=sec}
@@ -849,11 +934,14 @@ function RunPlanView({onBack}){
 function RunningCard({onSchema}){
   const tk=todayKey();
   const ws0=weekStartOf(new Date());
-  const kmIn=ws=>runsInWeek(ws).reduce((a,r)=>{const l=runLog(r.id);return a+(l&&l.done&&l.km?l.km:0)},0);
+  const extras=stravaExtras();
+  const extrasIn=ws=>{const k=localKey(ws);return extras.filter(s=>localKey(weekStartOf(new Date(s.date+T12)))===k)};
+  const kmIn=ws=>runsInWeek(ws).reduce((a,r)=>{const l=runLog(r.id);return a+(l&&l.done&&l.km?l.km:0)},0)+extrasIn(ws).reduce((a,s)=>a+(s.km||0),0);
   const weeks=Array.from({length:8},(_,i)=>{const w=new Date(ws0);w.setDate(w.getDate()-7*(7-i));return{w,km:kmIn(w)}});
   const cur=weeks[7].km,mx=Math.max(1,...weeks.map(x=>x.km));
   const thisWeek=runsInWeek(ws0);
   const done=thisWeek.filter(r=>runStatus(r,tk)==="done").length;
+  const extraN=extrasIn(ws0).length;
   const goals=nextGoals(tk,2);
   return(
     <div className="card">
@@ -861,7 +949,7 @@ function RunningCard({onSchema}){
         <div>
           <div className="lbl">Hardlopen deze week</div>
           <div className="syne" style={{fontSize:30,color:RUN_COLOR,marginTop:4}}>{fmtNum(cur.toFixed(1))} km</div>
-          <div className="muted" style={{fontSize:13}}>{done}/{thisWeek.length} runs gedaan</div>
+          <div className="muted" style={{fontSize:13}}>{done}/{thisWeek.length} runs gedaan{extraN?`, ${extraN} extra`:""}</div>
         </div>
         <button onClick={onSchema} className="pill" style={{color:RUN_COLOR,borderColor:RUN_COLOR+"55"}}><I n="map" s={13}/>Schema</button>
       </div>
@@ -872,6 +960,79 @@ function RunningCard({onSchema}){
         </div>)}
       </div>
       {goals.length>0&&<div style={{fontSize:13.5,color:"#c4c4cc",marginTop:12}}>{goals.map(g=>`Nog ${g.days} dagen tot ${g.l}.`).join(" ")}</div>}
+    </div>
+  );
+}
+
+function StravaRunCard({s}){
+  const line=stravaLine(s);
+  return(
+    <div className="card" style={{borderColor:RUN_COLOR+"55"}}>
+      <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:RUN_COLOR,fontWeight:600}}><I n="run" s={15} c={RUN_COLOR}/>Extra run, via Strava</span>
+      <div className="syne" style={{fontSize:22,lineHeight:1.2,marginTop:8}}>{fmtNum(s.km)} km in {fmtDur(s.sec)}</div>
+      <div className="muted" style={{fontSize:13.5,marginTop:3,lineHeight:1.45}}>{[s.name,line].filter(Boolean).join(". ")}</div>
+    </div>
+  );
+}
+
+function StravaCard(){
+  const [busy,setBusy]=useState(false);
+  const [msg,setMsg]=useState(()=>{const f=STRAVA_FLASH;STRAVA_FLASH=null;if(!f)return"";return f==="ok"?"Gekoppeld met Strava. Je runs worden opgehaald.":STRAVA_ERR[f]||STRAVA_ERR.token});
+  const a=stravaAuth();
+  const connect=()=>{location.href="/.netlify/functions/strava-login"};
+  async function syncNow(){
+    setBusy(true);setMsg("");
+    const r=await syncStrava(true);
+    setBusy(false);
+    if(r.ok)setMsg(r.added?`${r.added} nieuwe ${r.added===1?"run":"runs"} opgehaald.`:"Alles is al bijgewerkt.");
+    else if(r.error!=="auth")setMsg(STRAVA_ERR[r.error]||STRAVA_ERR.strava);
+  }
+  function disconnect(){
+    if(!window.confirm("Strava loskoppelen? Je opgehaalde runs blijven in Pim Fit staan."))return;
+    lsDel("pf_strava");
+    setMsg("Losgekoppeld. Wil je Pim Fit ook bij Strava weghalen, dan kan dat op strava.com bij Instellingen, Mijn apps.");
+    window.dispatchEvent(new Event("pf-strava"));
+  }
+  if(!a)return(
+    <div className="card">
+      <div className="lbl" style={{marginBottom:6}}>Strava</div>
+      <div style={{fontSize:13.5,color:"#a8a8b0",lineHeight:1.55,marginBottom:12}}>Koppel Strava, dan komen je runs vanzelf in Pim Fit. Staat er die dag een run in je schema, dan wordt die afgevinkt en ingevuld.</div>
+      <button onClick={connect} className="btn-primary" style={{background:STRAVA_COLOR,color:"#fff"}}>Verbinden met Strava</button>
+      {msg&&<div className="muted" style={{fontSize:13,marginTop:10,lineHeight:1.5}}>{msg}</div>}
+    </div>
+  );
+  const runs=stravaRuns().slice(0,5);
+  const linked=stravaLinked();
+  const last=a.lastSync?new Date(a.lastSync):null;
+  const lastText=!last?"nog niet":localKey(last)===todayKey()?`vandaag om ${last.toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})}`:fmtDate(localKey(last));
+  return(
+    <div className="card">
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+        <div className="lbl">Strava</div>
+        <button onClick={disconnect} className="pill" style={{padding:"4px 10px"}}>Loskoppelen</button>
+      </div>
+      <div style={{fontSize:13.5,color:"#a8a8b0",lineHeight:1.55}}>Gekoppeld{a.name?` als ${a.name}`:""}. Bijgewerkt: {lastText}.</div>
+      {a.error==="auth"?(
+        <>
+          <div style={{fontSize:13.5,color:"#fb923c",marginTop:10,lineHeight:1.5}}>{STRAVA_ERR.auth}</div>
+          <button onClick={connect} className="btn-primary" style={{background:STRAVA_COLOR,color:"#fff",marginTop:10}}>Opnieuw koppelen</button>
+        </>
+      ):(
+        <button onClick={syncNow} disabled={busy} className="btn-ghost" style={{marginTop:12,opacity:busy?.6:1}}>{busy?"Bezig met ophalen…":"Nu ophalen"}</button>
+      )}
+      {msg&&<div className="muted" style={{fontSize:13,marginTop:10,lineHeight:1.5}}>{msg}</div>}
+      {runs.length>0&&<div style={{marginTop:8}}>
+        {runs.map(s=>(
+          <div key={s.id} className="row" style={{alignItems:"flex-start"}}>
+            <span className="muted" style={{width:66,flexShrink:0,fontSize:13,fontWeight:600}}>{fmtDayShort(s.date)}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontSize:14.5}}>{fmtNum(s.km)} km in {fmtDur(s.sec)}</div>
+              <div className="muted" style={{fontSize:12.5,marginTop:1}}>{stravaLine(s)||s.name}</div>
+            </div>
+            <span style={{fontSize:12,color:linked.has(s.id)?RUN_COLOR:"#8b8b95",whiteSpace:"nowrap"}}>{linked.has(s.id)?"in schema":"extra"}</span>
+          </div>
+        ))}
+      </div>}
     </div>
   );
 }
@@ -1194,6 +1355,7 @@ function ProgressTab({onSchema}){
       <div className="h1" style={{marginBottom:14}}>Voortgang</div>
 
       <RunningCard onSchema={onSchema}/>
+      <StravaCard/>
 
       {/* Gewicht als weekgemiddelde */}
       <div className="card">
@@ -1250,7 +1412,7 @@ function ProgressTab({onSchema}){
 
       <BackupCard/>
       <div className="muted" style={{fontSize:11.5,textAlign:"center",lineHeight:1.6,marginTop:4}}>
-        Pim Fit 3.2<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}{FIT.short?", korte weergave":""}
+        Pim Fit 3.3<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}{FIT.short?", korte weergave":""}
       </div>
       {showBW&&<BWModal onClose={()=>{setShowBW(false);setRev(r=>r+1)}}/>}
     </div>
@@ -1273,7 +1435,7 @@ function CalendarCard(){
   const all=lsGet("pf_ex",{});
   const dayMuscles={};
   catalog().forEach(ex=>{(all[ex.id]||[]).filter(h=>h.date.startsWith(moStr)).forEach(h=>{(dayMuscles[h.date]=dayMuscles[h.date]||[]);if(!dayMuscles[h.date].includes(ex.muscle))dayMuscles[h.date].push(ex.muscle)})});
-  const runDays=new Set(RUN_LIST.filter(r=>{const l=runLog(r.id);return l&&l.done}).map(runDate));
+  const runDays=new Set([...RUN_LIST.filter(r=>{const l=runLog(r.id);return l&&l.done}).map(runDate),...stravaExtras().map(s=>s.date)]);
   let trainedCount=0,planned=0;
   for(let i=1;i<=dim;i++){
     const ds=`${moStr}-${String(i).padStart(2,"0")}`;
@@ -1324,7 +1486,7 @@ function BackupCard(){
   const age=last?Math.round((new Date(todayKey()+T12)-new Date(last+T12))/86400000):null;
   async function exportData(){
     const data={};
-    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("pf_")&&k!=="pf_last_backup")data[k]=localStorage.getItem(k)}
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("pf_")&&k!=="pf_last_backup"&&k!=="pf_strava")data[k]=localStorage.getItem(k)}
     const name="pimfit-backup-"+todayKey()+".json";
     const json=JSON.stringify({app:"pim-fit",versie:2,gemaakt:new Date().toISOString(),data});
     const blob=new Blob([json],{type:"application/json"});
@@ -1341,14 +1503,14 @@ function BackupCard(){
     r.onload=()=>{
       let j=null;try{j=JSON.parse(r.result)}catch{}
       if(!j||j.app!=="pim-fit"||!j.data||typeof j.data!=="object"){setMsg("Dit bestand is geen Pim Fit back-up.");return}
-      const keys=Object.keys(j.data).filter(k=>k.startsWith("pf_")&&typeof j.data[k]==="string");
+      const keys=Object.keys(j.data).filter(k=>k.startsWith("pf_")&&k!=="pf_strava"&&typeof j.data[k]==="string");
       if(!keys.length){setMsg("Deze back-up is leeg.");return}
       const when=j.gemaakt?new Date(j.gemaakt).toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"}):"een onbekende datum";
       if(!window.confirm(`Back-up van ${when} terugzetten? Wat nu in de app staat wordt vervangen.`))return;
-      const old={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("pf_"))old[k]=localStorage.getItem(k)}
+      const old={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("pf_")&&k!=="pf_strava")old[k]=localStorage.getItem(k)}
       try{Object.keys(old).forEach(k=>localStorage.removeItem(k));keys.forEach(k=>localStorage.setItem(k,j.data[k]))}
       catch{
-        try{Object.keys(localStorage).filter(k=>k.startsWith("pf_")).forEach(k=>localStorage.removeItem(k));Object.keys(old).forEach(k=>localStorage.setItem(k,old[k]))}catch{}
+        try{Object.keys(localStorage).filter(k=>k.startsWith("pf_")&&k!=="pf_strava").forEach(k=>localStorage.removeItem(k));Object.keys(old).forEach(k=>localStorage.setItem(k,old[k]))}catch{}
         setMsg("Terugzetten lukte niet. Je oude data staat er nog.");return;
       }
       location.reload();
@@ -1425,8 +1587,17 @@ function NotesTab(){
 const TABS=[{id:"today",label:"Vandaag",icon:"calendar",color:"#a3e635"},{id:"progress",label:"Voortgang",icon:"chart",color:"#38bdf8"},{id:"notes",label:"Notities",icon:"notes",color:"#fb923c"}];
 
 function App(){
-  const [tab,setTab]=useState("today");
+  const [tab,setTab]=useState(()=>STRAVA_FLASH?"progress":"today");
   const [view,setView]=useState(null);
+  const [,setStravaRev]=useState(0);
+  useEffect(()=>{
+    const bump=()=>setStravaRev(r=>r+1);
+    const onVisible=()=>{if(document.visibilityState==="visible")syncStrava(false)};
+    window.addEventListener("pf-strava",bump);
+    document.addEventListener("visibilitychange",onVisible);
+    syncStrava(false);
+    return()=>{window.removeEventListener("pf-strava",bump);document.removeEventListener("visibilitychange",onVisible)};
+  },[]);
   const [training,setTraining]=useState(()=>{const t=lsGet("pf_training",null);return t&&t.date===todayKey()?t:null});
   const [rest,setRest]=useState(()=>{const r=lsGet("pf_timer",null);return r&&r.endAt>Date.now()-3000?r:null});
   useEffect(()=>{if(rest)lsSet("pf_timer",rest);else lsDel("pf_timer")},[rest]);
@@ -1457,4 +1628,5 @@ function App(){
 }
 
 fitScreen();
+readStravaHash();
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);

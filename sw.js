@@ -1,6 +1,6 @@
 // Pim Fit service worker: laat de app ook zonder internet werken.
 // Pas VERSION aan als je wilt dat alles opnieuw in de cache komt.
-const VERSION = "pimfit-v4";
+const VERSION = "pimfit-v5";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 const CDN = [
   "https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js",
@@ -33,6 +33,9 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // Strava-koppeling en andere functies altijd vers van het netwerk, nooit uit de cache.
+  if (url.origin === self.location.origin && url.pathname.startsWith("/.netlify/")) return;
 
   // De app zelf: eerst het netwerk (zodat updates meteen binnenkomen), anders de opgeslagen versie.
   if (req.mode === "navigate") {

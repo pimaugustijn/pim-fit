@@ -21,7 +21,7 @@ python3 -m http.server 8080
 # then open http://localhost:8080
 ```
 
-**To deploy changes:** after editing `app.jsx`, manually convert JSX to `React.createElement()` calls and update `index.html`. Both files must stay in sync. The comment at the top of `app.jsx` says it is the source; `index.html` is the compiled production version.
+**To deploy changes:** edit `app.jsx`, then regenerate the app script in `index.html`. It is exactly the output of Babel with `@babel/preset-react` (`runtime: "classic"`, `comments: false`) run on `app.jsx`, placed between the `else{` line after the React-load check and the closing `}` before the service-worker `<script>`. Install Babel in a scratch directory (not in the repo, there is no package.json) and splice the output in; never hand-edit the compiled code.
 
 **To force the service worker to fetch a fresh cache** after updating `index.html`, bump `VERSION` in `sw.js`.
 
@@ -70,6 +70,18 @@ All workout and running data is **hardcoded as constants** at the top of the fil
 - `TARGETS` — weekly sets target per muscle group for the volume tracker
 
 To add or change exercises or runs, edit these constants in both `app.jsx` and `index.html`.
+
+## Strava integration
+
+Netlify Functions in `netlify/functions/` (shared code in `netlify/lib/strava.mjs`) keep the client secret server-side:
+
+- `strava-login` → redirects to Strava OAuth with a `state` cookie
+- `strava-callback` → checks `state` and scope, exchanges the code, redirects to `/#strava=<json>` (or `/#strava-fout=<reden>`); `readStravaHash()` in the app stores it and cleans the URL
+- `strava-sync` (POST `{refresh_token, after}`) → refreshes the token and returns slimmed runs plus the possibly rotated `refresh_token`, which the client must always save
+
+Netlify env vars: `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, optional `STRAVA_API_BASE` (default `https://www.strava.com/api/v3`; Strava's new host `https://api-v3.strava.com` is available from 4 January 2027) and `STRAVA_OAUTH_BASE`.
+
+Client storage: `pf_strava` (token, excluded from backup export/import), `pf_strava_runs` (by Strava id), `pf_strava_seen` (ids already matched). `matchStrava()` links a new Strava run to the planned run on the same date: marks it done, fills only empty km/sec/hr, sets `strava: <id>` on the `pf_run_` log. Skipped planned runs are left alone. Unlinked runs are "extra" runs (`stravaExtras()`). Sync runs on app open and when the app becomes visible, throttled to every 10 minutes. `sw.js` must never cache `/.netlify/` requests.
 
 ## iOS PWA specifics
 
