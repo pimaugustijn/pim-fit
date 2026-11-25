@@ -3,9 +3,11 @@ const {useState,useEffect,useRef,useMemo}=React;
 
 // ─── CONSTANTEN ───────────────────────────────────────────────────────────────
 const DAYS=["Upper A","Lower","Upper B","Upper C"];
-const DAY_COLORS=["#a3e635","#38bdf8","#f472b6","#fb923c"];
+const DAY_COLORS=["#9bbf6e","#6fa6d6","#cf8cb3","#d69b6c"];
+// Eén accentkleur (Linear-lavendel): ACC voor vlakken, ACC_T voor tekst en iconen op de donkere achtergrond
+const ACC="#5e6ad2",ACC_T="#828fff";
 const MUSCLES=["chest","back","shoulders","biceps","triceps","quads","hamstrings","glutes","calves","core"];
-const MUSCLE_COLORS={chest:"#f472b6",back:"#38bdf8",shoulders:"#fb923c",biceps:"#a3e635",triceps:"#c084fc",quads:"#38bdf8",hamstrings:"#fb923c",glutes:"#f472b6",calves:"#a3e635",core:"#a8a8b0"};
+const MUSCLE_COLORS={chest:"#cf8cb3",back:"#6fa6d6",shoulders:"#d69b6c",biceps:"#9bbf6e",triceps:"#a48ed8",quads:"#6fa6d6",hamstrings:"#d69b6c",glutes:"#cf8cb3",calves:"#9bbf6e",core:"#8a8f98"};
 const TARGETS={chest:6,back:8,shoulders:8,biceps:6,triceps:6,quads:8,hamstrings:3,glutes:4,calves:4,core:3};
 const SUPPLEMENTS=[{id:"creatine",label:"Creatine",dose:"5 g"},{id:"vitd",label:"Vitamine D",dose:"2000 IE"},{id:"mag",label:"Magnesium + B6",dose:"voor het slapen"}];
 const QUOTES=["Small steps every day beat giant leaps once in a while.","The body achieves what the mind believes.","Train hard, recover harder.","Progress, not perfection.","Every rep is a vote for the person you want to become.","Discipline is doing it even when you don't feel like it.","You don't have to be extreme, just consistent.","The pain you feel today is the strength you feel tomorrow.","Show up. That's already 80% of it.","Results happen over time, not overnight.","Your only competition is who you were yesterday.","Hard work beats talent when talent doesn't work hard.","Fall in love with the process.","Rest is part of the training.","You're one workout away from a better mood.","Earn it.","Make yourself proud.","Consistency is the key to results.","Harder than yesterday.","Don't stop when you're tired. Stop when you're done.","The secret is there is no secret. Just work.","Champions train, losers complain.","It never gets easier, you just get stronger.","Succes is de som van kleine inspanningen, dag na dag.","Jij bent sterker dan je excuses.","Doe het voor de versie van jou die trots op je is.","One more rep.","Strong body, strong mind.","De beste training is de training die je gewoon doet.","Sweat now, shine later.","Je hoeft het niet leuk te vinden, je moet het wel doen.","Every session counts.","Push through the hard part.","Vandaag beter dan gisteren.","It's supposed to be hard. That's why it's worth it.","Geen excuses, wel resultaat.","Trust the process.","Je lichaam kan meer dan je denkt.","Two more sets. Always two more sets.","Discipline beats motivation every time.","Laat je lichaam zien wat je wil worden.","The grind never stops.","Kleine winsten, groot verschil.","Do it for future you.","Energy flows where focus goes.","Niemand spijt het om getraind te hebben.","Be the person your body deserves.","Sterk wordt je niet in één dag, maar elke dag een beetje.","Finish what you started.","Harder, beter, sterker.","One workout at a time."];
@@ -65,7 +67,7 @@ const MON=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","de
 
 // ─── LOOPSCHEMA ───────────────────────────────────────────────────────────────
 // Per week: s = maandag, p = fase, runs = [datum, tekst, soort, km]. gymOff = weekdagen zonder gym (0 = ma).
-const RUN_COLOR="#2dd4bf";
+const RUN_COLOR="#5fb8a8";
 const RUNPLAN=[
     { s:'2026-10-12', p:1, runs:[['2026-10-15','30 min rustig','easy'],['2026-10-17','7 km rustig','long',7]] },
     { s:'2026-10-19', p:1, runs:[['2026-10-22','35 min rustig + 4 strides','easy'],['2026-10-24','8 km rustig','long',8]] },
@@ -340,15 +342,15 @@ function Sheet({onClose,title,children}){
   return(
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.72)",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:400,backdropFilter:"blur(4px)",WebkitBackdropFilter:"blur(4px)"}}>
       <div onClick={e=>e.stopPropagation()} className="sheet">
-        <div style={{width:40,height:4,background:"#2c2c33",borderRadius:2,margin:"10px auto 16px"}}/>
+        <div style={{width:40,height:4,background:"#34343a",borderRadius:2,margin:"10px auto 16px"}}/>
         {title&&<div className="h2" style={{marginBottom:14}}>{title}</div>}
         {children}
       </div>
     </div>
   );
 }
-function Check({on,color,onClick,size=28,label}){
-  return <button onClick={onClick} aria-label={label} aria-pressed={on} style={{width:size,height:size,borderRadius:"50%",border:`1.6px solid ${on?color:"#4a4a54"}`,background:on?color:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#0a0a0c"}}>{on&&<I n="check" s={size*.55} w={3}/>}</button>;
+function Check({on,color=ACC,onClick,size=28,label}){
+  return <button onClick={onClick} aria-label={label} aria-pressed={on} style={{width:size,height:size,borderRadius:"50%",border:`1.6px solid ${on?color:"#3e3e44"}`,background:on?color:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:"#ffffff"}}>{on&&<I n="check" s={size*.55} w={3}/>}</button>;
 }
 
 // ─── WEEKOVERZICHT ────────────────────────────────────────────────────────────
@@ -368,13 +370,13 @@ function WeekHistModal({onClose}){
           const tg=weekTarget(w);
           const end=new Date(w);end.setDate(end.getDate()+6);
           return(
-            <div key={localKey(w)} style={{padding:"12px 14px",borderRadius:14,background:"#0e0e11",border:"1px solid #222228"}}>
+            <div key={localKey(w)} style={{padding:"12px 14px",borderRadius:12,background:"#141516",border:"1px solid #23252a"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:9}}>
                 <div style={{fontSize:13.5,fontWeight:600}}>{i===0?"Deze week":`${fmtDate(localKey(w))} – ${fmtDate(localKey(end))}`}</div>
-                <div style={{fontSize:13,fontWeight:600,color:cnt>=tg?"#a3e635":cnt>=1?"#fb923c":"#8b8b95"}}>{cnt}/{tg}</div>
+                <div style={{fontSize:13,fontWeight:600,color:cnt>=tg?ACC_T:cnt>=1?"#d9a066":"#8a8f98"}}>{cnt}/{tg}</div>
               </div>
               <div style={{display:"flex",gap:5}}>
-                {days.map((k,j)=>{const t=trained.has(k);return <div key={k} style={{flex:1,aspectRatio:"1",borderRadius:8,background:t?"#a3e63520":"#17171b",border:`1px solid ${k===tk?"#a3e635":t?"#a3e63540":"#26262d"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:k>tk?.35:1}}><div style={{fontSize:10,color:"#8b8b95"}}>{DL[j]}</div><div style={{fontSize:12,color:t?"#a3e635":"#5d5d67"}}>{t?"✓":"·"}</div></div>})}
+                {days.map((k,j)=>{const t=trained.has(k);return <div key={k} style={{flex:1,aspectRatio:"1",borderRadius:8,background:t?"#828fff20":"#141516",border:`1px solid ${k===tk?"#828fff":t?"#828fff40":"#23252a"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:k>tk?.35:1}}><div style={{fontSize:10,color:"#8a8f98"}}>{DL[j]}</div><div style={{fontSize:12,color:t?"#828fff":"#62666d"}}>{t?"✓":"·"}</div></div>})}
               </div>
             </div>
           );
@@ -401,8 +403,8 @@ function BWModal({onClose}){
   }
   return(
     <Sheet onClose={onClose} title="Gewicht">
-      <input type="number" inputMode="decimal" placeholder="Gewicht in kg" value={w} onChange={e=>setW(e.target.value)} className="inp" style={{fontSize:22,height:56,marginBottom:10,borderColor:"#38bdf855"}}/>
-      <button onClick={save} className="btn-primary" style={{background:ok?"#a3e635":"#38bdf8",marginBottom:18}}>{ok?"Opgeslagen":"Opslaan"}</button>
+      <input type="number" inputMode="decimal" placeholder="Gewicht in kg" value={w} onChange={e=>setW(e.target.value)} className="inp" style={{fontSize:22,height:56,marginBottom:10,borderColor:"#828fff55"}}/>
+      <button onClick={save} className="btn-primary" style={{background:ok?"#27a644":ACC,marginBottom:18}}>{ok?"Opgeslagen":"Opslaan"}</button>
       {hist.length>0&&<>
         <div className="lbl" style={{marginBottom:6}}>Laatste wegingen</div>
         {hist.slice(0,10).map(h=><div key={h.date} className="row" style={{justifyContent:"space-between"}}><span className="muted" style={{fontSize:14}}>{fmtDate(h.date)}</span><span style={{fontSize:15,fontWeight:600}}>{fmtNum(h.w)} kg</span></div>)}
@@ -424,16 +426,16 @@ function RestBar({rest,setRest}){
   const left=Math.max(0,Math.ceil((rest.endAt-now)/1000));
   const pct=rest.doneAt?1:Math.min(1,1-left/rest.total);
   const done=!!rest.doneAt;
-  const c=done?"#a3e635":"#38bdf8";
+  const c=done?"#828fff":"#828fff";
   return(
-    <div style={{flexShrink:0,background:done?"#a3e63514":"#38bdf812",borderTop:`1px solid ${c}55`,padding:"10px 16px",display:"flex",alignItems:"center",gap:12}}>
+    <div style={{flexShrink:0,background:done?"#828fff14":"#828fff12",borderTop:`1px solid ${c}55`,padding:"10px 16px",display:"flex",alignItems:"center",gap:12}}>
       <I n="clock" s={20} c={c}/>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:13,color:done?"#c5f07a":"#7dd3fc",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{done?"Klaar, volgende set":`Rust${rest.name?" na "+rest.name:""}`}</div>
-        <div style={{height:4,borderRadius:2,background:"#1f2b33",marginTop:5}}><div style={{width:`${pct*100}%`,height:"100%",borderRadius:2,background:c,transition:"width .25s linear"}}/></div>
+        <div style={{fontSize:13,color:done?"#828fff":"#828fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{done?"Klaar, volgende set":`Rust${rest.name?" na "+rest.name:""}`}</div>
+        <div style={{height:4,borderRadius:2,background:"#23252a",marginTop:5}}><div style={{width:`${pct*100}%`,height:"100%",borderRadius:2,background:c,transition:"width .25s linear"}}/></div>
       </div>
-      <div className="syne" style={{fontSize:22,color:done?"#a3e635":"#e0f2fe",minWidth:52,textAlign:"right"}}>{fmtTime(left)}</div>
-      {!done&&<button onClick={()=>setRest(r=>r&&{...r,endAt:r.endAt+30000,total:r.total+30})} className="pill" style={{color:"#7dd3fc",borderColor:"#38bdf855"}}>+30 s</button>}
+      <div className="syne" style={{fontSize:22,color:done?"#828fff":"#f7f8f8",minWidth:52,textAlign:"right",fontVariantNumeric:"tabular-nums"}}>{fmtTime(left)}</div>
+      {!done&&<button onClick={()=>setRest(r=>r&&{...r,endAt:r.endAt+30000,total:r.total+30})} className="pill" style={{color:"#828fff",borderColor:"#828fff55"}}>+30 s</button>}
       <button onClick={()=>setRest(null)} aria-label="Timer stoppen" className="pill" style={{padding:"6px 8px"}}><I n="x" s={14}/></button>
     </div>
   );
@@ -508,17 +510,17 @@ function TodayTab({onStart,onSchema}){
     <div className="fu">
       {/* Kop */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:14}}>
-        <div style={{fontSize:14,color:"#a8a8b0"}}>{cap(now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}))}</div>
+        <div style={{fontSize:13.5,color:"#d0d6e0",minWidth:0,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{cap(now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}))}</div>
         <div style={{display:"flex",gap:6}}>
-          <button onClick={()=>setShowWeeks(true)} className="pill" style={streak>0?{color:"#fb923c",borderColor:"#fb923c55"}:{}}><I n="flame" s={14}/>{streak>0?`${streak} ${streak===1?"week":"weken"}`:`${weekN}/${target}`}</button>
+          <button onClick={()=>setShowWeeks(true)} className="pill" style={streak>0?{color:ACC_T,borderColor:ACC+"55"}:{}}><I n="flame" s={14}/>{streak>0?`${streak} ${streak===1?"week":"weken"}`:`${weekN}/${target}`}</button>
           <button onClick={()=>setShowBW(true)} className="pill"><I n="scale" s={14}/>{bw?`${fmtNum(bw.w)} kg`:"gewicht"}</button>
         </div>
       </div>
 
       <WeekStrip tk={tk} trained={trained}/>
       <div className="muted" style={{fontSize:12.5,marginTop:8,marginBottom:12}}>Gym {weekN}/{target}{weekRuns.length?`, lopen ${weekRunsDone}/${weekRuns.length}`:""} deze week</div>
-      {week&&(week.tag||week.note)&&<div style={{marginBottom:12,padding:"10px 13px",borderRadius:12,background:"#121215",border:"1px solid #222228",fontSize:13.5,lineHeight:1.5,color:"#c4c4cc"}}>
-        {week.tag&&<span style={{color:week.goal?"#fbbf24":RUN_COLOR,fontWeight:600}}>{week.tag}{week.note?". ":""}</span>}{week.note||""}
+      {week&&(week.tag||week.note)&&<div style={{marginBottom:12,padding:"10px 13px",borderRadius:8,background:"#0f1011",border:"1px solid #23252a",fontSize:13.5,lineHeight:1.5,color:"#d0d6e0"}}>
+        {week.tag&&<span style={{color:week.goal?"#d6b46a":RUN_COLOR,fontWeight:600}}>{week.tag}{week.note?". ":""}</span>}{week.note||""}
       </div>}
 
       {runsToday.map(run=><RunCard key={run.id} run={run} tk={tk} label={both?"Ochtendrun":"Hardlopen"} onChange={refresh} onSheet={type=>setRunSheet({type,run})} onSchema={onSchema}/>)}
@@ -529,7 +531,7 @@ function TodayTab({onStart,onSchema}){
           {both&&<div style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:col,fontWeight:600,marginBottom:8}}><I n="moon" s={14} c={col}/>Avondtraining</div>}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
             <div>
-              <div className="syne" style={{fontSize:32,color:col,lineHeight:1.05,letterSpacing:"-1px"}}>{day}</div>
+              <div className="syne" style={{fontSize:30,lineHeight:1.1,letterSpacing:"-0.8px",display:"flex",alignItems:"center",gap:10}}><span style={{width:10,height:10,borderRadius:"50%",background:col,flexShrink:0}}/>{day}</div>
               <div className="muted" style={{fontSize:13.5,marginTop:4}}>{exs.length} oefeningen, ongeveer {estMinutes(ids)} minuten</div>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:6,alignItems:"flex-end"}}>
@@ -537,12 +539,12 @@ function TodayTab({onStart,onSchema}){
               <button onClick={()=>setRestDay(true)} className="pill"><I n="moon" s={13}/>Geen gym</button>
             </div>
           </div>
-          {off&&<div style={{fontSize:13,color:"#fb923c",marginTop:10}}>Volgens je loopschema train je vandaag niet: {off.tag?off.tag.toLowerCase():"rustweek"}.</div>}
+          {off&&<div style={{fontSize:13,color:"#d9a066",marginTop:10}}>Volgens je loopschema train je vandaag niet: {off.tag?off.tag.toLowerCase():"rustweek"}.</div>}
           {showDays&&<div style={{display:"flex",gap:6,marginTop:12}}>
-            {DAYS.map((d,i)=><button key={d} onClick={()=>{setSplitIdx(i);setShowDays(false)}} style={{flex:1,padding:"8px 2px",borderRadius:10,fontSize:12.5,fontWeight:600,background:i===splitIdx?DAY_COLORS[i]+"20":"#17171b",border:`1px solid ${i===splitIdx?DAY_COLORS[i]+"70":"#26262d"}`,color:i===splitIdx?DAY_COLORS[i]:"#a8a8b0"}}>{d}</button>)}
+            {DAYS.map((d,i)=><button key={d} onClick={()=>{setSplitIdx(i);setShowDays(false)}} style={{flex:1,padding:"8px 2px",borderRadius:8,fontSize:12.5,fontWeight:600,background:i===splitIdx?ACC+"26":"#141516",border:`1px solid ${i===splitIdx?ACC:"#23252a"}`,color:i===splitIdx?"#f7f8f8":"#d0d6e0"}}>{d}</button>)}
           </div>}
-          <button onClick={()=>onStart(splitIdx,(firstOpen||exs[0])?.id)} className="btn-primary" style={{background:col,marginTop:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <I n="play" s={16} c="#0a0a0c"/>{doneCount===0?"Start training":doneCount<exs.length?`Verder met training (${doneCount}/${exs.length})`:"Training bekijken"}
+          <button onClick={()=>onStart(splitIdx,(firstOpen||exs[0])?.id)} className="btn-primary" style={{marginTop:14,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            <I n="play" s={16} c="#ffffff"/>{doneCount===0?"Start training":doneCount<exs.length?`Verder met training (${doneCount}/${exs.length})`:"Training bekijken"}
           </button>
           <div style={{marginTop:10}}>
             {exs.map(ex=>{
@@ -554,10 +556,10 @@ function TodayTab({onStart,onSchema}){
               return(
                 <div key={ex.id} className="row">
                   <div style={{flex:1,minWidth:0,cursor:"pointer"}} onClick={()=>onStart(splitIdx,ex.id)}>
-                    <div className="syne" style={{fontSize:15,color:d?"#8b8b95":"#e8e8e8",textDecoration:d?"line-through":"none"}}>{ex.name}</div>
-                    <div style={{fontSize:13,color:tSets?col:"#8b8b95",marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{sub}</div>
+                    <div className="syne" style={{fontSize:15,color:d?"#8a8f98":"#f7f8f8",textDecoration:d?"line-through":"none"}}>{ex.name}</div>
+                    <div style={{fontSize:13,color:tSets?ACC_T:"#8a8f98",marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{sub}</div>
                   </div>
-                  <Check on={d} color={col} label={`${ex.name} afvinken`} onClick={()=>setExDone(p=>({...p,[ex.id]:!p[ex.id]}))}/>
+                  <Check on={d} label={`${ex.name} afvinken`} onClick={()=>setExDone(p=>({...p,[ex.id]:!p[ex.id]}))}/>
                 </div>
               );
             })}
@@ -584,7 +586,7 @@ function TodayTab({onStart,onSchema}){
             </div>
             <button onClick={()=>setRestDay(false)} className="pill">Toch trainen</button>
           </div>
-          <div style={{fontSize:14,color:"#c4c4cc",fontStyle:"italic",lineHeight:1.6,marginTop:16}}>"{getDailyQuote()}"</div>
+          <div style={{fontSize:14,color:"#d0d6e0",fontStyle:"italic",lineHeight:1.6,marginTop:16}}>"{getDailyQuote()}"</div>
         </div>
       )}
 
@@ -592,12 +594,12 @@ function TodayTab({onStart,onSchema}){
       <div className="card">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <div className="lbl">Supplementen</div>
-          <div style={{fontSize:12.5,color:suppCount===SUPPLEMENTS.length?"#a3e635":"#8b8b95"}}>{suppCount}/{SUPPLEMENTS.length}</div>
+          <div style={{fontSize:12.5,color:suppCount===SUPPLEMENTS.length?"#828fff":"#8a8f98"}}>{suppCount}/{SUPPLEMENTS.length}</div>
         </div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           {SUPPLEMENTS.map(s=>{const d=!!supps[s.id];return(
-            <button key={s.id} onClick={()=>setSupps(p=>({...p,[s.id]:!p[s.id]}))} className="pill" style={{padding:"9px 13px",fontSize:13.5,...(d?{color:"#a3e635",borderColor:"#a3e63570",background:"#a3e63512"}:{})}}>
-              {d&&<I n="check" s={14} w={3}/>}{s.label}<span style={{color:d?"#a3e635aa":"#6b6b75",fontSize:12}}>{s.dose}</span>
+            <button key={s.id} onClick={()=>setSupps(p=>({...p,[s.id]:!p[s.id]}))} className="pill" style={{padding:"9px 13px",fontSize:13.5,...(d?{color:"#828fff",borderColor:"#828fff70",background:"#828fff12"}:{})}}>
+              {d&&<I n="check" s={14} w={3}/>}{s.label}<span style={{color:d?"#828fffaa":"#62666d",fontSize:12}}>{s.dose}</span>
             </button>
           )})}
         </div>
@@ -635,18 +637,18 @@ function WeekStrip({tk,trained}){
         const runsDone=x.runs.every(r=>runStatus(r,tk)==="done");
         const allDone=(x.gi===undefined||gymDone)&&runsDone;
         const isT=x.k===tk,past=x.k<tk;
-        const c=x.gi!==undefined?DAY_COLORS[x.gi]:(x.runs.some(isSpecial)?"#fbbf24":RUN_COLOR);
+        const c=x.gi!==undefined?DAY_COLORS[x.gi]:(x.runs.some(isSpecial)?"#d6b46a":RUN_COLOR);
         const main=x.gi!==undefined?DAYS[x.gi]:runShort(x.runs[0]);
         const status=allDone?"gedaan":past?"gemist":isT?"vandaag":"gepland";
         const runDone=x.runs.length&&runsDone;
         return(
-          <div key={x.k} style={{flex:1,minWidth:0,padding:"7px 3px",borderRadius:12,background:allDone?c+"16":"transparent",border:`1px solid ${isT?c:allDone?c+"40":"#26262d"}`,textAlign:"center"}}>
-            <div style={{fontSize:11.5,color:isT||allDone?c:"#8b8b95"}}>{DOW[(x.d.getDay()+6)%7]} {x.d.getDate()}</div>
-            <div className="syne" style={{fontSize:13,color:isT||allDone?c:"#e8e8e8",marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{main}</div>
+          <div key={x.k} style={{flex:1,minWidth:0,padding:"7px 3px",borderRadius:8,background:allDone?ACC+"1f":"transparent",border:`1px solid ${isT?ACC:allDone?ACC+"55":"#23252a"}`,textAlign:"center"}}>
+            <div style={{fontSize:11.5,color:isT?ACC_T:"#8a8f98"}}>{DOW[(x.d.getDay()+6)%7]} {x.d.getDate()}</div>
+            <div className="syne" style={{fontSize:13,color:c,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{main}</div>
             {x.gi!==undefined&&x.runs.length?(
-              <div style={{fontSize:11,marginTop:1,color:runDone?RUN_COLOR:past?"#f87171":"#8b8b95",display:"flex",alignItems:"center",justifyContent:"center",gap:3}}><I n="run" s={11}/>{runShort(x.runs[0])}</div>
+              <div style={{fontSize:11,marginTop:1,color:runDone?RUN_COLOR:past?"#e5787a":"#8a8f98",display:"flex",alignItems:"center",justifyContent:"center",gap:3}}><I n="run" s={11}/>{runShort(x.runs[0])}</div>
             ):(
-              <div style={{fontSize:11,marginTop:1,color:allDone?c:past?"#f87171":"#6b6b75"}}>{status}</div>
+              <div style={{fontSize:11,marginTop:1,color:allDone?ACC_T:past?"#e5787a":"#62666d"}}>{status}</div>
             )}
           </div>
         );
@@ -660,12 +662,12 @@ function RunCard({run,tk,label,onChange,onSheet,onSchema}){
   const st=runStatus(run,tk);
   const moved=runDate(run)!==run.date;
   const special=isSpecial(run);
-  const c=special?"#fbbf24":RUN_COLOR;
+  const c=special?"#d6b46a":RUN_COLOR;
   const sum=runSummary(l);
   function quickDone(){lsSet("pf_run_"+run.id,{...l,done:true,skipped:false,savedAt:new Date().toISOString()});onChange()}
   function undo(){lsDel("pf_run_"+run.id);onChange()}
   return(
-    <div className="card" style={{borderColor:c+"55"}}>
+    <div className="card">
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
         <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:12.5,color:c,fontWeight:600}}><I n={special?"trophy":"run"} s={15} c={c}/>{label}</span>
         <div style={{display:"flex",gap:6}}>
@@ -676,10 +678,10 @@ function RunCard({run,tk,label,onChange,onSheet,onSchema}){
       <div className="syne" style={{fontSize:22,lineHeight:1.2,marginTop:8}}>{run.text}</div>
       <div className="muted" style={{fontSize:13.5,marginTop:3,lineHeight:1.45}}>{runSub(run)}{moved?` Verplaatst van ${fmtDayShort(run.date)}.`:""}</div>
       {st==="done"?(
-        <button onClick={()=>onSheet("log")} style={{width:"100%",marginTop:12,padding:"10px 12px",borderRadius:12,background:c+"14",border:`1px solid ${c}45`,display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
-          <span style={{width:26,height:26,borderRadius:"50%",background:c,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><I n="check" s={15} c="#0a0a0c" w={3}/></span>
-          <span style={{flex:1,minWidth:0}}><span style={{display:"block",fontSize:15}}>{sum.main}</span>{sum.sub&&<span style={{display:"block",fontSize:12.5,color:special?"#fde68a":"#99f6e4",marginTop:1}}>{sum.sub}</span>}</span>
-          <I n="edit" s={15} c="#8b8b95"/>
+        <button onClick={()=>onSheet("log")} style={{width:"100%",marginTop:12,padding:"10px 12px",borderRadius:8,background:ACC+"14",border:`1px solid ${ACC}45`,display:"flex",alignItems:"center",gap:10,textAlign:"left"}}>
+          <span style={{width:26,height:26,borderRadius:"50%",background:ACC,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><I n="check" s={15} c="#ffffff" w={3}/></span>
+          <span style={{flex:1,minWidth:0}}><span style={{display:"block",fontSize:15}}>{sum.main}</span>{sum.sub&&<span style={{display:"block",fontSize:12.5,color:"#d0d6e0",marginTop:1}}>{sum.sub}</span>}</span>
+          <I n="edit" s={15} c="#8a8f98"/>
         </button>
       ):st==="skipped"?(
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12,gap:8}}>
@@ -688,7 +690,7 @@ function RunCard({run,tk,label,onChange,onSheet,onSchema}){
         </div>
       ):(
         <div style={{display:"flex",gap:8,marginTop:12}}>
-          <button onClick={quickDone} className="btn-primary" style={{flex:2,height:46,background:c,display:"flex",alignItems:"center",justifyContent:"center",gap:7}}><I n="check" s={16} c="#0a0a0c" w={3}/>Gedaan</button>
+          <button onClick={quickDone} className="btn-primary" style={{flex:2,height:46,display:"flex",alignItems:"center",justifyContent:"center",gap:7}}><I n="check" s={16} c="#ffffff" w={3}/>Gedaan</button>
           <button onClick={()=>onSheet("log")} className="btn-ghost" style={{flex:1.25,height:46,fontSize:13.5,padding:0}}>Invullen</button>
           <button onClick={()=>onSheet("move")} className="btn-ghost" style={{flex:1.45,height:46,fontSize:13.5,padding:0}}>Verplaatsen</button>
         </div>
@@ -705,7 +707,6 @@ function RunLogSheet({run,onClose}){
   const [feel,setFeel]=useState(l.feel||null);
   const [note,setNote]=useState(l.note||"");
   const [err,setErr]=useState("");
-  const c=isSpecial(run)?"#fbbf24":RUN_COLOR;
   function save(){
     const o={done:true,savedAt:new Date().toISOString()};
     const k=km.trim(),tt=t.trim(),h=hr.trim();
@@ -728,11 +729,11 @@ function RunLogSheet({run,onClose}){
       </div>
       <div className="lbl" style={{marginTop:14,marginBottom:8}}>Hoe voelde het?</div>
       <div style={{display:"flex",gap:6}}>
-        {["makkelijk","goed","zwaar"].map(f=><button key={f} onClick={()=>setFeel(feel===f?null:f)} className="pill" style={{padding:"8px 14px",fontSize:13.5,...(feel===f?{background:"#e8e8e8",color:"#0a0a0c",borderColor:"#e8e8e8"}:{})}}>{cap(f)}</button>)}
+        {["makkelijk","goed","zwaar"].map(f=><button key={f} onClick={()=>setFeel(feel===f?null:f)} className="pill" style={{padding:"8px 14px",fontSize:13.5,...(feel===f?{background:"#f7f8f8",color:"#010102",borderColor:"#f7f8f8"}:{})}}>{cap(f)}</button>)}
       </div>
       <input value={note} onChange={e=>setNote(e.target.value)} placeholder="Notitie, zoals kuiten iets stijf" maxLength={200} className="inp" style={{marginTop:14}}/>
-      {err&&<div style={{fontSize:13,color:"#f87171",marginTop:10}}>{err}</div>}
-      <button onClick={save} className="btn-primary" style={{background:c,marginTop:14}}>Opslaan</button>
+      {err&&<div style={{fontSize:13,color:"#e5787a",marginTop:10}}>{err}</div>}
+      <button onClick={save} className="btn-primary" style={{marginTop:14}}>Opslaan</button>
       {(l.done||l.skipped)&&<button onClick={clear} className="btn-ghost" style={{marginTop:8}}>Wissen</button>}
       <div className="muted" style={{fontSize:12.5,textAlign:"center",marginTop:10}}>Alleen afvinken kan ook, de rest is optioneel.</div>
     </Sheet>
@@ -755,8 +756,8 @@ function MoveSheet({run,onClose}){
       {days.map(k=>{const b=busy(k),isCur=k===cur;return(
         <button key={k} disabled={b} onClick={()=>moveTo(k)} className="row" style={{width:"100%",textAlign:"left",opacity:b?.4:1}}>
           <div style={{flex:1,minWidth:0}}>
-            <div style={{fontSize:15,fontWeight:600,color:isCur?RUN_COLOR:"#e8e8e8"}}>{cap(fmtDayLong(k))}</div>
-            <div style={{fontSize:12.5,color:!b&&near(k)?"#fb923c":"#8b8b95"}}>{b?"daar staat al een run":k===run.date?"oorspronkelijke dag":near(k)?"let op: dan loop je twee dagen achter elkaar":k<tk?"al geweest, alleen om in te vullen":""}</div>
+            <div style={{fontSize:15,fontWeight:600,color:isCur?RUN_COLOR:"#f7f8f8"}}>{cap(fmtDayLong(k))}</div>
+            <div style={{fontSize:12.5,color:!b&&near(k)?"#d9a066":"#8a8f98"}}>{b?"daar staat al een run":k===run.date?"oorspronkelijke dag":near(k)?"let op: dan loop je twee dagen achter elkaar":k<tk?"al geweest, alleen om in te vullen":""}</div>
           </div>
           {isCur&&<I n="check" s={18} c={RUN_COLOR} w={3}/>}
         </button>
@@ -772,7 +773,7 @@ function HelpSheet({onClose}){
     <Sheet onClose={onClose} title="Zo loop je de runs">
       {RUN_HELP.map(([t,d],i)=><div key={t} className="row" style={{flexDirection:"column",alignItems:"flex-start",gap:3,borderTop:i?undefined:"none"}}>
         <div style={{fontSize:14.5,fontWeight:600}}>{t}</div>
-        <div style={{fontSize:14,color:"#c4c4cc",lineHeight:1.55}}>{d}</div>
+        <div style={{fontSize:14,color:"#d0d6e0",lineHeight:1.55}}>{d}</div>
       </div>)}
     </Sheet>
   );
@@ -788,10 +789,10 @@ function RunPlanView({onBack}){
   const goals=nextGoals(tk,2);
   function statusEl(run){
     const st=runStatus(run,tk);
-    if(st==="done")return <I n="check" s={17} c={isSpecial(run)?"#fbbf24":RUN_COLOR} w={3}/>;
-    if(st==="missed")return <span style={{fontSize:12,color:"#f87171"}}>gemist</span>;
+    if(st==="done")return <I n="check" s={17} c={isSpecial(run)?"#d6b46a":RUN_COLOR} w={3}/>;
+    if(st==="missed")return <span style={{fontSize:12,color:"#e5787a"}}>gemist</span>;
     if(st==="skipped")return <span className="muted" style={{fontSize:12}}>overgeslagen</span>;
-    if(st==="today")return <span style={{fontSize:12,color:RUN_COLOR}}>vandaag</span>;
+    if(st==="today")return <span style={{fontSize:12,color:ACC_T}}>vandaag</span>;
     return null;
   }
   return(
@@ -807,23 +808,23 @@ function RunPlanView({onBack}){
         <div key={p} style={{marginTop:24}}>
           <div className="h2">{P.t}</div>
           <div className="muted" style={{fontSize:13,marginTop:2}}>{P.when}</div>
-          <div style={{fontSize:14,color:"#c4c4cc",lineHeight:1.5,margin:"6px 0 10px"}}>{P.intro}</div>
+          <div style={{fontSize:14,color:"#d0d6e0",lineHeight:1.5,margin:"6px 0 10px"}}>{P.intro}</div>
           {RUNPLAN.map((w,wi)=>{
             if(w.p!==p)return null;
             const en=new Date(w.s+T12);en.setDate(en.getDate()+6);
             const isCur=wi===curWi,past=localKey(en)<tk;
             const runs=RUN_LIST.filter(r=>r.wi===wi);
             return(
-              <div key={w.s} ref={isCur?curRef:null} className="card" style={{padding:"12px 14px",marginBottom:8,borderColor:isCur?RUN_COLOR+"90":undefined,opacity:past?.78:1}}>
+              <div key={w.s} ref={isCur?curRef:null} className="card" style={{padding:"12px 14px",marginBottom:8,borderColor:isCur?ACC+"90":undefined,opacity:past?.78:1}}>
                 <div style={{display:"flex",flexWrap:"wrap",alignItems:"baseline",gap:"2px 10px",marginBottom:4}}>
                   <span className="syne" style={{fontSize:15}}>{fmtDate(w.s)} – {fmtDate(localKey(en))}</span>
-                  {isCur&&<span style={{fontSize:12.5,color:RUN_COLOR,fontWeight:600}}>deze week</span>}
-                  {w.tag&&<span style={{fontSize:12.5,color:w.goal?"#fbbf24":"#8b8b95",fontWeight:w.goal?600:400}}>{w.tag}</span>}
+                  {isCur&&<span style={{fontSize:12.5,color:ACC_T,fontWeight:600}}>deze week</span>}
+                  {w.tag&&<span style={{fontSize:12.5,color:w.goal?"#d6b46a":"#8a8f98",fontWeight:w.goal?600:400}}>{w.tag}</span>}
                 </div>
                 {runs.map(r=>(
                   <button key={r.id} onClick={()=>r.kind!=="off"&&setSheet({type:"log",run:r})} style={{width:"100%",display:"grid",gridTemplateColumns:"66px minmax(0,1fr) auto",gap:10,alignItems:"start",padding:"6px 0",textAlign:"left"}}>
                     <span className="muted" style={{fontSize:13,fontWeight:600,whiteSpace:"nowrap"}}>{fmtDayShort(runDate(r))}</span>
-                    <span style={{fontSize:14,lineHeight:1.45,color:isSpecial(r)?"#fbbf24":r.kind==="off"?"#8b8b95":"#e8e8e8",fontWeight:isSpecial(r)?600:400}}>{r.text}{runDate(r)!==r.date&&<span className="muted" style={{fontSize:12,fontWeight:400}}> (verplaatst)</span>}</span>
+                    <span style={{fontSize:14,lineHeight:1.45,color:isSpecial(r)?"#d6b46a":r.kind==="off"?"#8a8f98":"#f7f8f8",fontWeight:isSpecial(r)?600:400}}>{r.text}{runDate(r)!==r.date&&<span className="muted" style={{fontSize:12,fontWeight:400}}> (verplaatst)</span>}</span>
                     {statusEl(r)}
                   </button>
                 ))}
@@ -837,7 +838,7 @@ function RunPlanView({onBack}){
         <div className="h2">Daarna: marathon Eindhoven</div>
         <div className="muted" style={{fontSize:13,marginTop:2,marginBottom:10}}>5 april tot 10 oktober 2027, in grote lijnen</div>
         <div className="card" style={{padding:"4px 14px"}}>
-          {MARATHON.map(([d,t],i)=><div key={d} className="row" style={{alignItems:"flex-start",borderTop:i?undefined:"none"}}><span className="muted" style={{width:74,flexShrink:0,fontSize:13,fontWeight:600}}>{d}</span><span style={{fontSize:14,lineHeight:1.5,color:i===MARATHON.length-1?"#fbbf24":"#e8e8e8"}}>{t}</span></div>)}
+          {MARATHON.map(([d,t],i)=><div key={d} className="row" style={{alignItems:"flex-start",borderTop:i?undefined:"none"}}><span className="muted" style={{width:74,flexShrink:0,fontSize:13,fontWeight:600}}>{d}</span><span style={{fontSize:14,lineHeight:1.5,color:i===MARATHON.length-1?"#d6b46a":"#f7f8f8"}}>{t}</span></div>)}
         </div>
       </div>
       {sheet&&sheet.type==="log"&&<RunLogSheet run={sheet.run} onClose={()=>{setSheet(null);setRev(r=>r+1)}}/>}
@@ -860,18 +861,18 @@ function RunningCard({onSchema}){
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
         <div>
           <div className="lbl">Hardlopen deze week</div>
-          <div className="syne" style={{fontSize:30,color:RUN_COLOR,marginTop:4}}>{fmtNum(cur.toFixed(1))} km</div>
+          <div className="syne" style={{fontSize:30,marginTop:4}}>{fmtNum(cur.toFixed(1))} km</div>
           <div className="muted" style={{fontSize:13}}>{done}/{thisWeek.length} runs gedaan</div>
         </div>
-        <button onClick={onSchema} className="pill" style={{color:RUN_COLOR,borderColor:RUN_COLOR+"55"}}><I n="map" s={13}/>Schema</button>
+        <button onClick={onSchema} className="pill"><I n="map" s={13}/>Schema</button>
       </div>
       <div style={{display:"flex",alignItems:"flex-end",gap:6,height:62,marginTop:14}}>
         {weeks.map((x,i)=><div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-          <div style={{width:"100%",height:x.km?8+x.km/mx*36:4,borderRadius:6,background:i===7?RUN_COLOR:x.km?RUN_COLOR+"55":"#26262d"}}/>
-          <div style={{fontSize:10.5,color:"#8b8b95"}}>{x.w.getDate()}/{x.w.getMonth()+1}</div>
+          <div style={{width:"100%",height:x.km?8+x.km/mx*36:4,borderRadius:6,background:i===7?ACC:x.km?ACC+"55":"#23252a"}}/>
+          <div style={{fontSize:10.5,color:"#8a8f98"}}>{x.w.getDate()}/{x.w.getMonth()+1}</div>
         </div>)}
       </div>
-      {goals.length>0&&<div style={{fontSize:13.5,color:"#c4c4cc",marginTop:12}}>{goals.map(g=>`Nog ${g.days} dagen tot ${g.l}.`).join(" ")}</div>}
+      {goals.length>0&&<div style={{fontSize:13.5,color:"#d0d6e0",marginTop:12}}>{goals.map(g=>`Nog ${g.days} dagen tot ${g.l}.`).join(" ")}</div>}
     </div>
   );
 }
@@ -993,13 +994,13 @@ function TrainingMode({dayIdx,startId,onExit,onMove,onRest}){
     return(
       <div className="fu" ref={topRef}>
         <div className="card" style={{textAlign:"center",padding:"28px 18px"}}>
-          <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><I n="trophy" s={34} c={col}/></div>
-          <div className="syne" style={{fontSize:28,color:col}}>{nDone===tIds.length?"Training klaar":"Training afgerond"}</div>
+          <div style={{display:"flex",justifyContent:"center",marginBottom:10}}><I n="trophy" s={34} c={ACC_T}/></div>
+          <div className="syne" style={{fontSize:28}}>{nDone===tIds.length?"Training klaar":"Training afgerond"}</div>
           <div className="muted" style={{fontSize:14,marginTop:4}}>{day}, {nDone} van {tIds.length} oefeningen</div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:20}}>
-            {[["Sets",sets],["Volume",`${Math.round(vol).toLocaleString("nl-NL")} kg`],["PR's",prs]].map(([l,v])=><div key={l} style={{background:"#0e0e11",border:"1px solid #222228",borderRadius:14,padding:"12px 6px"}}><div className="muted" style={{fontSize:12}}>{l}</div><div className="syne" style={{fontSize:19,marginTop:2}}>{v}</div></div>)}
+            {[["Sets",sets],["Volume",`${Math.round(vol).toLocaleString("nl-NL")} kg`],["PR's",prs]].map(([l,v])=><div key={l} style={{background:"#141516",border:"1px solid #23252a",borderRadius:12,padding:"12px 6px"}}><div className="muted" style={{fontSize:12}}>{l}</div><div className="syne" style={{fontSize:19,marginTop:2}}>{v}</div></div>)}
           </div>
-          <button onClick={onExit} className="btn-primary" style={{background:col,marginTop:20}}>Terug naar vandaag</button>
+          <button onClick={onExit} className="btn-primary" style={{marginTop:20}}>Terug naar vandaag</button>
           {nDone<tIds.length&&<button onClick={()=>{setFinished(false);goNext()}} className="btn-ghost" style={{marginTop:8}}>Toch verder</button>}
         </div>
       </div>
@@ -1010,11 +1011,11 @@ function TrainingMode({dayIdx,startId,onExit,onMove,onRest}){
     <div className="fu" ref={topRef}>
       {/* Bovenbalk */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-        <button onClick={onExit} className="pill" style={{border:"none",paddingLeft:0,fontSize:14}}><I n="left" s={18}/>{day}</button>
+        <button onClick={onExit} className="pill" style={{border:"none",paddingLeft:0,fontSize:14}}><I n="left" s={18}/><span style={{width:8,height:8,borderRadius:"50%",background:col}}/>{day}</button>
         <button onClick={()=>setSheet("list")} className="pill" style={{fontSize:13.5}}><I n="list" s={15}/>{idx+1} van {ids.length}</button>
       </div>
       <div style={{display:"flex",gap:3,marginBottom:18}} onClick={()=>setSheet("list")}>
-        {ids.map(id=><div key={id} style={{flex:1,height:5,borderRadius:3,background:done[id]?col:id===ex.id?col+"88":"#26262d"}}/>)}
+        {ids.map(id=><div key={id} style={{flex:1,height:5,borderRadius:3,background:done[id]?ACC:id===ex.id?ACC+"88":"#23252a"}}/>)}
       </div>
 
       {/* Oefening */}
@@ -1026,21 +1027,21 @@ function TrainingMode({dayIdx,startId,onExit,onMove,onRest}){
         <button onClick={()=>setSheet("swap")} className="pill" style={{flexShrink:0}}><I n="swap" s={14}/>Wisselen</button>
       </div>
 
-      <button onClick={()=>setSheet("note")} style={{display:"flex",alignItems:"center",gap:7,marginTop:10,fontSize:13.5,color:exNote?"#e8e8e8":"#8b8b95",textAlign:"left"}}>
-        <I n="edit" s={14} c={exNote?col:"#8b8b95"}/>{exNote||"Notitie toevoegen, zoals een stoelstand"}
+      <button onClick={()=>setSheet("note")} style={{display:"flex",alignItems:"center",gap:7,marginTop:10,fontSize:13.5,color:exNote?"#f7f8f8":"#8a8f98",textAlign:"left"}}>
+        <I n="edit" s={14} c={exNote?ACC_T:"#8a8f98"}/>{exNote||"Notitie toevoegen, zoals een stoelstand"}
       </button>
 
-      <div style={{marginTop:12,padding:"11px 13px",borderRadius:12,background:hint.up?col+"14":"#121215",border:`1px solid ${hint.up?col+"45":"#222228"}`,fontSize:13.5,lineHeight:1.5,color:hint.up?"#e8e8e8":"#c4c4cc"}}>{hint.text}</div>
+      <div style={{marginTop:12,padding:"11px 13px",borderRadius:8,background:hint.up?ACC+"14":"#0f1011",border:`1px solid ${hint.up?ACC+"45":"#23252a"}`,fontSize:13.5,lineHeight:1.5,color:hint.up?"#f7f8f8":"#d0d6e0"}}>{hint.text}</div>
 
       {/* Sets */}
       <div style={{marginTop:14}}>
-        <div style={{display:"grid",gridTemplateColumns:"22px minmax(0,1fr) minmax(0,1fr) 44px",gap:8,fontSize:12,color:"#8b8b95",marginBottom:6,paddingLeft:2}}><span/> <span style={{textAlign:"center"}}>kg</span><span style={{textAlign:"center"}}>reps</span><span/></div>
+        <div style={{display:"grid",gridTemplateColumns:"22px minmax(0,1fr) minmax(0,1fr) 44px",gap:8,fontSize:12,color:"#8a8f98",marginBottom:6,paddingLeft:2}}><span/> <span style={{textAlign:"center"}}>kg</span><span style={{textAlign:"center"}}>reps</span><span/></div>
         {rows.map((r,i)=>(
           <div key={i} style={{display:"grid",gridTemplateColumns:"22px minmax(0,1fr) minmax(0,1fr) 44px",gap:8,alignItems:"center",marginBottom:8}}>
-            <span style={{fontSize:14,color:r.done?col:"#8b8b95",textAlign:"center"}}>{i+1}</span>
-            <input type="number" inputMode="decimal" value={r.weight} disabled={r.done} onChange={e=>edit(i,"weight",e.target.value)} placeholder="kg" className="inp set-inp" style={r.done?{color:col,borderColor:col+"40",background:col+"0c"}:{}}/>
-            <input type="number" inputMode="numeric" value={r.reps} disabled={r.done} onChange={e=>edit(i,"reps",e.target.value)} placeholder="reps" className="inp set-inp" style={r.done?{color:col,borderColor:col+"40",background:col+"0c"}:{}}/>
-            <div style={{display:"flex",justifyContent:"center"}}><Check on={r.done} color={col} size={38} label={`Set ${i+1} ${r.done?"terugzetten":"afvinken"}`} onClick={()=>toggleSet(i)}/></div>
+            <span style={{fontSize:14,color:r.done?ACC_T:"#8a8f98",textAlign:"center"}}>{i+1}</span>
+            <input type="number" inputMode="decimal" value={r.weight} disabled={r.done} onChange={e=>edit(i,"weight",e.target.value)} placeholder="kg" className="inp set-inp" style={r.done?{color:ACC_T,borderColor:ACC+"55",background:ACC+"14"}:{}}/>
+            <input type="number" inputMode="numeric" value={r.reps} disabled={r.done} onChange={e=>edit(i,"reps",e.target.value)} placeholder="reps" className="inp set-inp" style={r.done?{color:ACC_T,borderColor:ACC+"55",background:ACC+"14"}:{}}/>
+            <div style={{display:"flex",justifyContent:"center"}}><Check on={r.done} size={38} label={`Set ${i+1} ${r.done?"terugzetten":"afvinken"}`} onClick={()=>toggleSet(i)}/></div>
           </div>
         ))}
         <div style={{display:"flex",gap:8}}>
@@ -1052,32 +1053,32 @@ function TrainingMode({dayIdx,startId,onExit,onMove,onRest}){
       {/* Verder */}
       <div style={{display:"flex",gap:8,marginTop:16}}>
         <button onClick={later} className="btn-ghost" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}><I n="later" s={15}/>Later</button>
-        <button onClick={()=>goNext()} style={{flex:2,height:50,borderRadius:14,border:`1.5px solid ${col}`,color:col,fontSize:15,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
+        <button onClick={()=>goNext()} style={{flex:2,height:50,borderRadius:8,border:`1px solid ${ACC}`,color:ACC_T,fontSize:15,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:7}}>
           {ids.every(id=>id===ex.id||done[id])?"Afronden":"Volgende oefening"}<I n="right" s={16}/>
         </button>
       </div>
       <div className="muted" style={{fontSize:12.5,textAlign:"center",marginTop:8}}>{doneSets}/{target.sets} sets gedaan</div>
 
       {/* Geschiedenis */}
-      <ExerciseHistory ex={ex} col={col} open={showHist} setOpen={setShowHist}/>
+      <ExerciseHistory ex={ex} col={ACC} open={showHist} setOpen={setShowHist}/>
 
-      {toast&&<div style={{position:"fixed",left:"50%",transform:"translateX(-50%)",top:"max(20px,env(safe-area-inset-top))",background:"#1c1c21",border:`1px solid ${col}66`,color:"#e8e8e8",padding:"10px 16px",borderRadius:12,fontSize:14,zIndex:500,whiteSpace:"nowrap"}}>{toast}</div>}
+      {toast&&<div style={{position:"fixed",left:"50%",transform:"translateX(-50%)",top:"max(20px,env(safe-area-inset-top))",background:"#18191a",border:"1px solid #34343a",color:"#f7f8f8",padding:"10px 16px",borderRadius:8,fontSize:14,zIndex:500,whiteSpace:"nowrap"}}>{toast}</div>}
 
       {sheet==="list"&&<Sheet onClose={()=>setSheet(null)} title={day}>
         {ids.map((id,i)=>{const e=exById(id),s=getTodaySets(id),t=parseTarget(e.sets);return(
           <button key={id} onClick={()=>{setCurId(id);setSheet(null)}} className="row" style={{width:"100%",textAlign:"left"}}>
-            <span style={{width:20,fontSize:13,color:"#8b8b95"}}>{i+1}</span>
+            <span style={{width:20,fontSize:13,color:"#8a8f98"}}>{i+1}</span>
             <div style={{flex:1,minWidth:0}}>
-              <div className="syne" style={{fontSize:15,color:id===ex.id?col:"#e8e8e8"}}>{e.name}</div>
+              <div className="syne" style={{fontSize:15,color:id===ex.id?ACC_T:"#f7f8f8"}}>{e.name}</div>
               <div className="muted" style={{fontSize:12.5}}>{s?`${s.length}/${t.sets} sets`:`doel ${t.label}`}</div>
             </div>
-            {done[id]&&<I n="check" s={18} c={col} w={3}/>}
+            {done[id]&&<I n="check" s={18} c={ACC_T} w={3}/>}
           </button>
         )})}
         <button onClick={()=>{setSheet(null);setFinished(true)}} className="btn-ghost" style={{marginTop:14}}>Training afronden</button>
       </Sheet>}
-      {sheet==="swap"&&<SwapSheet ex={ex} ids={ids} day={day} col={col} onClose={()=>setSheet(null)} onPick={doSwap}/>}
-      {sheet==="note"&&<NoteSheet ex={ex} col={col} onClose={()=>{setSheet(null);force(x=>x+1)}}/>}
+      {sheet==="swap"&&<SwapSheet ex={ex} ids={ids} day={day} col={ACC} onClose={()=>setSheet(null)} onPick={doSwap}/>}
+      {sheet==="note"&&<NoteSheet ex={ex} onClose={()=>{setSheet(null);force(x=>x+1)}}/>}
     </div>
   );
 }
@@ -1092,9 +1093,9 @@ function ExerciseHistory({ex,col,open,setOpen}){
       <button onClick={()=>setOpen(o=>!o)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
         <span className="lbl">Geschiedenis</span>
         <span style={{display:"flex",alignItems:"center",gap:10}}>
-          {pr>0&&<span style={{fontSize:13,color:"#fbbf24"}}>PR {fmtNum(pr)} kg</span>}
+          {pr>0&&<span style={{fontSize:13,color:"#d6b46a"}}>PR {fmtNum(pr)} kg</span>}
           <Sparkline data={spark} color={col} w={56} h={22}/>
-          <span style={{transform:open?"rotate(180deg)":"none",color:"#8b8b95"}}><I n="down" s={16}/></span>
+          <span style={{transform:open?"rotate(180deg)":"none",color:"#8a8f98"}}><I n="down" s={16}/></span>
         </span>
       </button>
       {open&&<div style={{marginTop:8}}>
@@ -1132,12 +1133,12 @@ function SwapSheet({ex,ids,day,col,onClose,onPick}){
   }
   const Opt=e=><button key={e.id} onClick={()=>onPick(e.id,permanent)} className="row" style={{width:"100%",textAlign:"left"}}>
     <div style={{flex:1}}><div className="syne" style={{fontSize:15}}>{e.name}</div><div className="muted" style={{fontSize:12.5}}>{e.detail||e.muscle}{e.custom?", eigen oefening":""}</div></div>
-    <I n="swap" s={16} c="#8b8b95"/>
+    <I n="swap" s={16} c="#8a8f98"/>
   </button>;
   return(
     <Sheet onClose={onClose} title={`${ex.name} wisselen`}>
       <div style={{display:"flex",gap:6,marginBottom:14}}>
-        {[[false,"Alleen vandaag"],[true,"Voortaan in mijn schema"]].map(([v,l])=><button key={l} onClick={()=>setPermanent(v)} style={{flex:1,padding:"9px 6px",borderRadius:10,fontSize:13,fontWeight:600,border:`1px solid ${permanent===v?col+"80":"#26262d"}`,background:permanent===v?col+"18":"transparent",color:permanent===v?col:"#a8a8b0"}}>{l}</button>)}
+        {[[false,"Alleen vandaag"],[true,"Voortaan in mijn schema"]].map(([v,l])=><button key={l} onClick={()=>setPermanent(v)} style={{flex:1,padding:"9px 6px",borderRadius:8,fontSize:13,fontWeight:600,border:`1px solid ${permanent===v?col+"80":"#23252a"}`,background:permanent===v?col+"18":"transparent",color:permanent===v?"#f7f8f8":"#d0d6e0"}}>{l}</button>)}
       </div>
       <div className="lbl" style={{marginBottom:2}}>Zelfde spiergroep</div>
       {same.length?same.map(Opt):<div className="muted" style={{fontSize:13.5,padding:"10px 0"}}>Geen andere oefeningen voor {ex.muscle} in je schema.</div>}
@@ -1148,20 +1149,20 @@ function SwapSheet({ex,ids,day,col,onClose,onPick}){
       <select value={muscle} onChange={e=>setMuscle(e.target.value)} className="inp" style={{marginBottom:8}}>
         {MUSCLES.map(m=><option key={m} value={m}>{m}</option>)}
       </select>
-      {err&&<div style={{fontSize:13,color:"#f87171",marginBottom:8}}>{err}</div>}
-      <button onClick={addNew} className="btn-primary" style={{background:col}}>Toevoegen en wisselen</button>
+      {err&&<div style={{fontSize:13,color:"#e5787a",marginBottom:8}}>{err}</div>}
+      <button onClick={addNew} className="btn-primary">Toevoegen en wisselen</button>
     </Sheet>
   );
 }
 
-function NoteSheet({ex,col,onClose}){
+function NoteSheet({ex,onClose}){
   const [text,setText]=useState(()=>getExNote(ex.name));
   function save(){setExNote(ex.name,text);onClose()}
   return(
     <Sheet onClose={save} title={`Notitie bij ${ex.name}`}>
       <textarea value={text} onChange={e=>setText(e.target.value)} rows={3} autoFocus placeholder="Stoelstand 4, brede grip, kabel op stand 2" className="inp" style={{height:"auto",padding:"12px 14px",fontSize:15,lineHeight:1.5,marginBottom:10}}/>
       <div className="muted" style={{fontSize:12.5,marginBottom:12}}>Deze notitie zie je elke keer bij {ex.name}, ook op andere trainingsdagen.</div>
-      <button onClick={save} className="btn-primary" style={{background:col}}>Opslaan</button>
+      <button onClick={save} className="btn-primary">Opslaan</button>
     </Sheet>
   );
 }
@@ -1201,17 +1202,17 @@ function ProgressTab({onSchema}){
           <div>
             <div className="lbl">Gewicht, gemiddeld per week</div>
             {cur?<>
-              <div className="syne" style={{fontSize:30,color:"#38bdf8",marginTop:4}}>{fmtNum(cur.avg.toFixed(1))} kg</div>
+              <div className="syne" style={{fontSize:30,marginTop:4}}>{fmtNum(cur.avg.toFixed(1))} kg</div>
               <div className="muted" style={{fontSize:13}}>{diff!=null?`${diff>0?"+":""}${fmtNum(diff.toFixed(1))} kg t.o.v. vorige week, `:""}{cur.n} {cur.n===1?"weging":"wegingen"} deze week</div>
             </>:<div className="muted" style={{fontSize:14,marginTop:6}}>Nog geen wegingen.</div>}
           </div>
-          <button onClick={()=>setShowBW(true)} className="pill" style={{color:"#38bdf8",borderColor:"#38bdf855"}}><I n="plus" s={14}/>Weging</button>
+          <button onClick={()=>setShowBW(true)} className="pill"><I n="plus" s={14}/>Weging</button>
         </div>
         {weeks.length>=2&&<div style={{display:"flex",alignItems:"flex-end",gap:6,height:64,marginTop:14}}>
           {weeks.map((w,i)=>{const h=maxAvg===minAvg?40:14+((w.avg-minAvg)/(maxAvg-minAvg))*46;return(
             <div key={w.week} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-              <div style={{width:"100%",height:h,borderRadius:6,background:i===weeks.length-1?"#38bdf8":"#38bdf840"}}/>
-              <div style={{fontSize:10.5,color:"#8b8b95"}}>{fmtDate(w.week).replace(".","")}</div>
+              <div style={{width:"100%",height:h,borderRadius:6,background:i===weeks.length-1?ACC:ACC+"40"}}/>
+              <div style={{fontSize:10.5,color:"#8a8f98"}}>{fmtDate(w.week).replace(".","")}</div>
             </div>
           )})}
         </div>}
@@ -1226,10 +1227,10 @@ function ProgressTab({onSchema}){
             return(
               <div key={m}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                  <div style={{fontSize:13.5,color:"#c4c4cc",textTransform:"capitalize"}}>{m}</div>
-                  <div style={{fontSize:12.5,color:p>=1?c:"#8b8b95"}}>{sets}/{target}</div>
+                  <div style={{fontSize:13.5,color:"#d0d6e0",textTransform:"capitalize"}}>{m}</div>
+                  <div style={{fontSize:12.5,color:p>=1?c:"#8a8f98"}}>{sets}/{target}</div>
                 </div>
-                <div style={{height:4,background:"#1f1f25",borderRadius:2}}><div style={{height:"100%",borderRadius:2,background:c,width:`${p*100}%`,transition:"width .6s ease"}}/></div>
+                <div style={{height:4,background:"#23252a",borderRadius:2}}><div style={{height:"100%",borderRadius:2,background:c,width:`${p*100}%`,transition:"width .6s ease"}}/></div>
               </div>
             );
           })}
@@ -1243,14 +1244,14 @@ function ProgressTab({onSchema}){
         <div className="lbl" style={{marginBottom:6}}>Persoonlijke records</div>
         {prList.length===0?<div className="muted" style={{fontSize:14,padding:"10px 0"}}>Log je eerste sets, dan verschijnen hier je PR's.</div>:
           prList.map(ex=><div key={ex.id} className="row" style={{justifyContent:"space-between"}}>
-            <div style={{minWidth:0}}><div className="syne" style={{fontSize:14.5}}>{ex.name}</div>{ex.lastDate&&<div className="muted" style={{fontSize:12.5}}>laatst {fmtDate(ex.lastDate)}</div>}</div>
-            <div className="syne" style={{fontSize:16,color:MUSCLE_COLORS[ex.muscle]||"#e8e8e8"}}>{fmtNum(ex.pr)} kg</div>
+            <div style={{minWidth:0}}><div className="syne" style={{fontSize:14.5,display:"flex",alignItems:"center",gap:8}}><span style={{width:7,height:7,borderRadius:"50%",background:MUSCLE_COLORS[ex.muscle]||"#8a8f98",flexShrink:0}}/>{ex.name}</div>{ex.lastDate&&<div className="muted" style={{fontSize:12.5}}>laatst {fmtDate(ex.lastDate)}</div>}</div>
+            <div className="syne" style={{fontSize:16}}>{fmtNum(ex.pr)} kg</div>
           </div>)}
       </div>
 
       <BackupCard/>
       <div className="muted" style={{fontSize:11.5,textAlign:"center",lineHeight:1.6,marginTop:4}}>
-        Pim Fit 3.2<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}{FIT.short?", korte weergave":""}
+        Pim Fit 3.3<br/>scherm {screen.width}×{screen.height}, app {FIT.h}, boven {FIT.top}, onder {FIT.bottom}, {FIT.standalone?"app-modus":"browser"}{FIT.short?", korte weergave":""}
       </div>
       {showBW&&<BWModal onClose={()=>{setShowBW(false);setRev(r=>r+1)}}/>}
     </div>
@@ -1290,7 +1291,7 @@ function CalendarCard(){
         <button onClick={nextMo} className="pill" aria-label="Volgende maand" style={{transform:"scaleX(-1)"}}><I n="left" s={14}/></button>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4,marginBottom:6}}>
-        {["ma","di","wo","do","vr","za","zo"].map(d=><div key={d} style={{textAlign:"center",fontSize:11.5,color:"#8b8b95"}}>{d}</div>)}
+        {["ma","di","wo","do","vr","za","zo"].map(d=><div key={d} style={{textAlign:"center",fontSize:11.5,color:"#8a8f98"}}>{d}</div>)}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:4}}>
         {cells.map((day,i)=>{
@@ -1301,16 +1302,16 @@ function CalendarCard(){
           const ms=dayMuscles[ds]||[];
           const ran=runDays.has(ds);
           return(
-            <button key={ds} onClick={()=>toggle(ds)} style={{aspectRatio:"1",borderRadius:9,background:trained?"#a3e63516":"#17171b",border:`1px solid ${isToday?"#a3e635":trained?"#a3e63538":"#222228"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,opacity:isFuture?.3:1}}>
-              <div style={{fontSize:12.5,color:isToday?"#a3e635":trained?"#e8e8e8":"#8b8b95",fontWeight:isToday?700:400}}>{day}</div>
-              {(trained||ran)&&<div style={{display:"flex",gap:2}}>{trained&&(ms.length?ms.slice(0,3):["x"]).map(m=><div key={m} style={{width:4,height:4,borderRadius:"50%",background:MUSCLE_COLORS[m]||"#a3e635"}}/>)}{ran&&<div style={{width:4,height:4,borderRadius:"50%",background:RUN_COLOR}}/>}</div>}
+            <button key={ds} onClick={()=>toggle(ds)} style={{aspectRatio:"1",borderRadius:8,background:trained?"#828fff16":"#141516",border:`1px solid ${isToday?"#828fff":trained?"#828fff38":"#23252a"}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,opacity:isFuture?.3:1}}>
+              <div style={{fontSize:12.5,color:isToday?"#828fff":trained?"#f7f8f8":"#8a8f98",fontWeight:isToday?700:400}}>{day}</div>
+              {(trained||ran)&&<div style={{display:"flex",gap:2}}>{trained&&(ms.length?ms.slice(0,3):["x"]).map(m=><div key={m} style={{width:4,height:4,borderRadius:"50%",background:MUSCLE_COLORS[m]||"#828fff"}}/>)}{ran&&<div style={{width:4,height:4,borderRadius:"50%",background:RUN_COLOR}}/>}</div>}
             </button>
           );
         })}
       </div>
       <div style={{marginTop:12,display:"flex",justifyContent:"space-between",fontSize:13}}>
         <div className="muted">{trainedCount} {trainedCount===1?"training":"trainingen"}{(()=>{const n=[...runDays].filter(d=>d.startsWith(moStr)).length;return n?`, ${n} ${n===1?"run":"runs"}`:""})()}</div>
-        <div style={{color:planned&&trainedCount>=planned?"#a3e635":"#8b8b95"}}>{planned?`${Math.min(trainedCount,planned)}/${planned} van je schema`:"nog geen geplande dagen"}</div>
+        <div style={{color:planned&&trainedCount>=planned?"#828fff":"#8a8f98"}}>{planned?`${Math.min(trainedCount,planned)}/${planned} van je schema`:"nog geen geplande dagen"}</div>
       </div>
     </div>
   );
@@ -1358,11 +1359,11 @@ function BackupCard(){
   return(
     <div className="card">
       <div className="lbl" style={{marginBottom:6}}>Back-up</div>
-      <div style={{fontSize:13.5,color:"#a8a8b0",lineHeight:1.55,marginBottom:12}}>
-        Je data staat alleen op deze telefoon. {last?<>Laatste back-up: <span style={{color:age>=14?"#fb923c":"#e8e8e8"}}>{fmtDate(last)}</span>{age>=14?", tijd voor een nieuwe.":"."}</>:"Je hebt nog geen back-up gemaakt."}
+      <div style={{fontSize:13.5,color:"#d0d6e0",lineHeight:1.55,marginBottom:12}}>
+        Je data staat alleen op deze telefoon. {last?<>Laatste back-up: <span style={{color:age>=14?"#d9a066":"#f7f8f8"}}>{fmtDate(last)}</span>{age>=14?", tijd voor een nieuwe.":"."}</>:"Je hebt nog geen back-up gemaakt."}
       </div>
       <div style={{display:"flex",gap:8}}>
-        <button onClick={exportData} className="btn-primary" style={{flex:1,background:"#a3e635"}}>Back-up maken</button>
+        <button onClick={exportData} className="btn-primary" style={{flex:1}}>Back-up maken</button>
         <button onClick={()=>fileRef.current&&fileRef.current.click()} className="btn-ghost" style={{flex:1,height:50}}>Terugzetten</button>
       </div>
       <input ref={fileRef} type="file" accept="application/json,.json" onChange={importData} style={{display:"none"}}/>
@@ -1391,9 +1392,9 @@ function NotesTab(){
       const si=lsGet("pf_split_"+date,null);
       const d=si!=null&&DAYS[si]?DAYS[si]:EX_DAY[logged.find(id=>EX_DAY[id])];
       if(d)return{text:d,color:DAY_COLORS[DAYS.indexOf(d)]};
-      return{text:"getraind",color:"#a3e635"};
+      return{text:"getraind",color:"#828fff"};
     }
-    if(cal[date])return{text:"getraind",color:"#a3e635"};
+    if(cal[date])return{text:"getraind",color:"#828fff"};
     return{text:"rustdag",color:null};
   }
   return(
@@ -1401,7 +1402,7 @@ function NotesTab(){
       <div className="h1" style={{marginBottom:14}}>Notities</div>
       {exNotes.length>0&&<div className="card">
         <div className="lbl" style={{marginBottom:4}}>Instellingen per oefening</div>
-        {exNotes.map(n=><div key={n.name} className="row" style={{alignItems:"flex-start",flexDirection:"column",gap:2}}><div className="syne" style={{fontSize:14.5}}>{n.name}</div><div style={{fontSize:14,color:"#c4c4cc"}}>{n.text}</div></div>)}
+        {exNotes.map(n=><div key={n.name} className="row" style={{alignItems:"flex-start",flexDirection:"column",gap:2}}><div className="syne" style={{fontSize:14.5}}>{n.name}</div><div style={{fontSize:14,color:"#d0d6e0"}}>{n.text}</div></div>)}
       </div>}
       {notes.length===0?(
         <div className="card"><div className="muted" style={{fontSize:14,textAlign:"center",padding:"20px 0"}}>Nog geen notities. Schrijf iets na je training.</div></div>
@@ -1410,10 +1411,10 @@ function NotesTab(){
         return(
           <div key={(n.run?"r":"d")+n.date} className="card">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:8}}>
-              <div className="syne" style={{fontSize:15,color:n.date===today?"#a3e635":"#e8e8e8"}}>{cap(fmtFull(n.date))}</div>
-              <div style={{fontSize:12,fontWeight:600,color:label.color||"#8b8b95",background:label.color?label.color+"15":"transparent",border:`1px solid ${label.color?label.color+"35":"#26262d"}`,padding:"3px 9px",borderRadius:7,whiteSpace:"nowrap"}}>{label.text}</div>
+              <div className="syne" style={{fontSize:15,color:n.date===today?"#828fff":"#f7f8f8"}}>{cap(fmtFull(n.date))}</div>
+              <div style={{fontSize:12,fontWeight:600,color:label.color||"#8a8f98",background:label.color?label.color+"15":"transparent",border:`1px solid ${label.color?label.color+"35":"#23252a"}`,padding:"3px 9px",borderRadius:6,whiteSpace:"nowrap"}}>{label.text}</div>
             </div>
-            <div style={{fontSize:14.5,color:"#c4c4cc",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{n.text}</div>
+            <div style={{fontSize:14.5,color:"#d0d6e0",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{n.text}</div>
           </div>
         );
       })}
@@ -1422,7 +1423,7 @@ function NotesTab(){
 }
 
 // ─── APP ──────────────────────────────────────────────────────────────────────
-const TABS=[{id:"today",label:"Vandaag",icon:"calendar",color:"#a3e635"},{id:"progress",label:"Voortgang",icon:"chart",color:"#38bdf8"},{id:"notes",label:"Notities",icon:"notes",color:"#fb923c"}];
+const TABS=[{id:"today",label:"Vandaag",icon:"calendar",color:ACC_T},{id:"progress",label:"Voortgang",icon:"chart",color:ACC_T},{id:"notes",label:"Notities",icon:"notes",color:ACC_T}];
 
 function App(){
   const [tab,setTab]=useState("today");
@@ -1447,8 +1448,8 @@ function App(){
       {!training&&!view&&<div className="tabbar">
         {TABS.map(t=>(
           <button key={t.id} className="tabbtn" onClick={()=>setTab(t.id)} aria-current={tab===t.id?"page":undefined}>
-            <I n={t.icon} s={21} c={tab===t.id?t.color:"#8b8b95"}/>
-            <div style={{fontSize:11.5,fontWeight:600,color:tab===t.id?t.color:"#8b8b95"}}>{t.label}</div>
+            <I n={t.icon} s={21} c={tab===t.id?t.color:"#8a8f98"}/>
+            <div style={{fontSize:11.5,fontWeight:600,color:tab===t.id?t.color:"#8a8f98"}}>{t.label}</div>
           </button>
         ))}
       </div>}

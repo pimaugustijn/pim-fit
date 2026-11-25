@@ -7,51 +7,54 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Pim Fit"/>
-  <meta name="theme-color" content="#0a0a0c"/>
+  <meta name="theme-color" content="#010102"/>
   <title>Pim Fit</title>
   <link rel="manifest" href="manifest.webmanifest"/>
   <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
   <link rel="icon" type="image/png" href="icon-192.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;margin:0;padding:0;overflow:hidden;background:#0a0a0c}
-    body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums;color:#e8e8e8;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+    html,body{height:100%;margin:0;padding:0;overflow:hidden;background:#010102}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;font-feature-settings:"cv11","ss01";letter-spacing:-0.05px;color:#f7f8f8;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
     ::-webkit-scrollbar{width:0}
     input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
     input[type=number]{-moz-appearance:textfield}
-    button{-webkit-tap-highlight-color:transparent;font-family:inherit;border:none;cursor:pointer;background:transparent;color:inherit}
+    button{-webkit-tap-highlight-color:transparent;font-family:inherit;letter-spacing:inherit;border:none;cursor:pointer;background:transparent;color:inherit}
+    button:focus-visible{outline:2px solid rgba(94,105,209,.5);outline-offset:2px}
     input,textarea,select{font-family:inherit}
     #root{position:fixed;top:0;right:0;left:0;height:100%;overflow:hidden}
     @supports (height:100dvh){#root{height:100dvh}}
-    html.short-vp,html.short-vp body{background:#0d0d0f}
+    html.short-vp,html.short-vp body{background:#010102}
     html.short-vp .tabbar{padding-bottom:6px}
     html.short-vp .sheet{padding-bottom:24px}
-    .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#8b8b95}
+    .fl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#8a8f98}
     .app-shell{height:100%;max-width:480px;margin:0 auto;display:flex;flex-direction:column}
     .page{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;padding-top:max(16px,env(safe-area-inset-top))}
-    .tabbar{flex-shrink:0;display:flex;background:#0d0d0f;border-top:1px solid #1f1f25;padding-bottom:max(6px,env(safe-area-inset-bottom))}
+    .tabbar{flex-shrink:0;display:flex;background:#010102;border-top:1px solid #23252a;padding-bottom:max(6px,env(safe-area-inset-bottom))}
     .tabbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 4px;gap:4px}
-    .card{background:#121215;border:1px solid #1f1f25;border-radius:20px;padding:16px 18px;margin-bottom:12px}
-    .syne{font-family:'Syne','DM Sans',sans-serif;font-weight:700}
-    .h1{font-family:'Syne','DM Sans',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.5px}
-    .h2{font-family:'Syne','DM Sans',sans-serif;font-weight:700;font-size:19px}
-    .lbl{font-size:13px;color:#8b8b95;font-weight:600}
-    .muted{color:#8b8b95}
-    .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #1f1f25}
-    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#c4c4cc;padding:6px 11px;border-radius:999px;border:1px solid #2c2c33;white-space:nowrap}
-    .inp{width:100%;min-width:0;height:48px;background:#17171b;border:1px solid #2c2c33;border-radius:12px;padding:0 14px;color:#f4f4f5;font-size:16px;outline:none}
-    .inp:focus{border-color:#4a4a54}
+    .card{background:#0f1011;border:1px solid #23252a;border-radius:12px;padding:16px 18px;margin-bottom:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+    .syne{font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:600;letter-spacing:-0.02em}
+    .h1{font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:600;font-size:28px;line-height:1.2;letter-spacing:-0.6px}
+    .h2{font-family:'Inter',system-ui,-apple-system,sans-serif;font-weight:600;font-size:20px;line-height:1.25;letter-spacing:-0.3px}
+    .lbl{font-size:13px;color:#8a8f98;font-weight:500;letter-spacing:0.2px}
+    .muted{color:#8a8f98}
+    .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #23252a}
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#d0d6e0;padding:6px 11px;border-radius:8px;border:1px solid #23252a;white-space:nowrap}
+    .inp{width:100%;min-width:0;height:48px;background:#141516;border:1px solid #34343a;border-radius:8px;padding:0 12px;color:#f7f8f8;font-size:16px;outline:none}
+    .inp:focus{border-color:#5e69d1;box-shadow:0 0 0 2px rgba(94,105,209,.5)}
     .inp:disabled{opacity:1;-webkit-text-fill-color:currentColor}
     textarea.inp{resize:none}
     select.inp{appearance:none;-webkit-appearance:none}
-    .set-inp{text-align:center;font-size:19px;font-weight:600;height:52px;padding:0 6px}
-    .inp::placeholder{color:#5d5d67;font-weight:400}
-    .btn-primary{width:100%;height:50px;border-radius:14px;color:#0a0a0c;font-size:15.5px;font-weight:700}
-    .btn-ghost{width:100%;height:44px;border-radius:12px;border:1px solid #2c2c33;color:#c4c4cc;font-size:14px;font-weight:600}
-    .sheet{background:#151518;border-top:1px solid #2c2c33;border-radius:22px 22px 0 0;padding:0 18px max(24px,env(safe-area-inset-bottom));width:100%;max-width:480px;max-height:86vh;overflow-y:auto}
+    .set-inp{font-variant-numeric:tabular-nums;text-align:center;font-size:19px;font-weight:600;height:52px;padding:0 6px}
+    .inp::placeholder{color:#62666d;font-weight:400}
+    .btn-primary{width:100%;height:48px;border-radius:8px;background:#5e6ad2;color:#fff;font-size:15px;font-weight:500}
+    .btn-primary:active{background:#5e69d1;filter:brightness(.92)}
+    .btn-ghost{width:100%;height:44px;border-radius:8px;background:#141516;border:1px solid #23252a;color:#f7f8f8;font-size:14px;font-weight:500}
+    .btn-ghost:active{background:#18191a}
+    .sheet{background:#0f1011;border-top:1px solid #23252a;border-radius:16px 16px 0 0;padding:0 18px max(24px,env(safe-area-inset-bottom));width:100%;max-width:480px;max-height:86vh;overflow-y:auto}
     @keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .fu{animation:fu .25s ease backwards}
 
@@ -71,19 +74,21 @@ const {
   useMemo
 } = React;
 const DAYS = ["Upper A", "Lower", "Upper B", "Upper C"];
-const DAY_COLORS = ["#a3e635", "#38bdf8", "#f472b6", "#fb923c"];
+const DAY_COLORS = ["#9bbf6e", "#6fa6d6", "#cf8cb3", "#d69b6c"];
+const ACC = "#5e6ad2",
+  ACC_T = "#828fff";
 const MUSCLES = ["chest", "back", "shoulders", "biceps", "triceps", "quads", "hamstrings", "glutes", "calves", "core"];
 const MUSCLE_COLORS = {
-  chest: "#f472b6",
-  back: "#38bdf8",
-  shoulders: "#fb923c",
-  biceps: "#a3e635",
-  triceps: "#c084fc",
-  quads: "#38bdf8",
-  hamstrings: "#fb923c",
-  glutes: "#f472b6",
-  calves: "#a3e635",
-  core: "#a8a8b0"
+  chest: "#cf8cb3",
+  back: "#6fa6d6",
+  shoulders: "#d69b6c",
+  biceps: "#9bbf6e",
+  triceps: "#a48ed8",
+  quads: "#6fa6d6",
+  hamstrings: "#d69b6c",
+  glutes: "#cf8cb3",
+  calves: "#9bbf6e",
+  core: "#8a8f98"
 };
 const TARGETS = {
   chest: 6,
@@ -341,7 +346,7 @@ Object.entries(WORKOUTS).forEach(([d, arr]) => arr.forEach(e => {
 }));
 const DOW = ["ma", "di", "wo", "do", "vr", "za", "zo"];
 const MON = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
-const RUN_COLOR = "#2dd4bf";
+const RUN_COLOR = "#5fb8a8";
 const RUNPLAN = [{
   s: '2026-10-12',
   p: 1,
@@ -1241,7 +1246,7 @@ function Sheet({
     style: {
       width: 40,
       height: 4,
-      background: "#2c2c33",
+      background: "#34343a",
       borderRadius: 2,
       margin: "10px auto 16px"
     }
@@ -1254,7 +1259,7 @@ function Sheet({
 }
 function Check({
   on,
-  color,
+  color = ACC,
   onClick,
   size = 28,
   label
@@ -1267,13 +1272,13 @@ function Check({
       width: size,
       height: size,
       borderRadius: "50%",
-      border: `1.6px solid ${on ? color : "#4a4a54"}`,
+      border: `1.6px solid ${on ? color : "#3e3e44"}`,
       background: on ? color : "transparent",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       flexShrink: 0,
-      color: "#0a0a0c"
+      color: "#ffffff"
     }
   }, on && React.createElement(I, {
     n: "check",
@@ -1327,9 +1332,9 @@ function WeekHistModal({
       key: localKey(w),
       style: {
         padding: "12px 14px",
-        borderRadius: 14,
-        background: "#0e0e11",
-        border: "1px solid #222228"
+        borderRadius: 12,
+        background: "#141516",
+        border: "1px solid #23252a"
       }
     }, React.createElement("div", {
       style: {
@@ -1347,7 +1352,7 @@ function WeekHistModal({
       style: {
         fontSize: 13,
         fontWeight: 600,
-        color: cnt >= tg ? "#a3e635" : cnt >= 1 ? "#fb923c" : "#8b8b95"
+        color: cnt >= tg ? ACC_T : cnt >= 1 ? "#d9a066" : "#8a8f98"
       }
     }, cnt, "/", tg)), React.createElement("div", {
       style: {
@@ -1362,8 +1367,8 @@ function WeekHistModal({
           flex: 1,
           aspectRatio: "1",
           borderRadius: 8,
-          background: t ? "#a3e63520" : "#17171b",
-          border: `1px solid ${k === tk ? "#a3e635" : t ? "#a3e63540" : "#26262d"}`,
+          background: t ? "#828fff20" : "#141516",
+          border: `1px solid ${k === tk ? "#828fff" : t ? "#828fff40" : "#23252a"}`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -1373,12 +1378,12 @@ function WeekHistModal({
       }, React.createElement("div", {
         style: {
           fontSize: 10,
-          color: "#8b8b95"
+          color: "#8a8f98"
         }
       }, DL[j]), React.createElement("div", {
         style: {
           fontSize: 12,
-          color: t ? "#a3e635" : "#5d5d67"
+          color: t ? "#828fff" : "#62666d"
         }
       }, t ? "✓" : "·"));
     })));
@@ -1428,13 +1433,13 @@ function BWModal({
       fontSize: 22,
       height: 56,
       marginBottom: 10,
-      borderColor: "#38bdf855"
+      borderColor: "#828fff55"
     }
   }), React.createElement("button", {
     onClick: save,
     className: "btn-primary",
     style: {
-      background: ok ? "#a3e635" : "#38bdf8",
+      background: ok ? "#27a644" : ACC,
       marginBottom: 18
     }
   }, ok ? "Opgeslagen" : "Opslaan"), hist.length > 0 && React.createElement(React.Fragment, null, React.createElement("div", {
@@ -1488,11 +1493,11 @@ function RestBar({
   const left = Math.max(0, Math.ceil((rest.endAt - now) / 1000));
   const pct = rest.doneAt ? 1 : Math.min(1, 1 - left / rest.total);
   const done = !!rest.doneAt;
-  const c = done ? "#a3e635" : "#38bdf8";
+  const c = done ? "#828fff" : "#828fff";
   return React.createElement("div", {
     style: {
       flexShrink: 0,
-      background: done ? "#a3e63514" : "#38bdf812",
+      background: done ? "#828fff14" : "#828fff12",
       borderTop: `1px solid ${c}55`,
       padding: "10px 16px",
       display: "flex",
@@ -1511,7 +1516,7 @@ function RestBar({
   }, React.createElement("div", {
     style: {
       fontSize: 13,
-      color: done ? "#c5f07a" : "#7dd3fc",
+      color: done ? "#828fff" : "#828fff",
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis"
@@ -1520,7 +1525,7 @@ function RestBar({
     style: {
       height: 4,
       borderRadius: 2,
-      background: "#1f2b33",
+      background: "#23252a",
       marginTop: 5
     }
   }, React.createElement("div", {
@@ -1535,9 +1540,10 @@ function RestBar({
     className: "syne",
     style: {
       fontSize: 22,
-      color: done ? "#a3e635" : "#e0f2fe",
+      color: done ? "#828fff" : "#f7f8f8",
       minWidth: 52,
-      textAlign: "right"
+      textAlign: "right",
+      fontVariantNumeric: "tabular-nums"
     }
   }, fmtTime(left)), !done && React.createElement("button", {
     onClick: () => setRest(r => r && {
@@ -1547,8 +1553,8 @@ function RestBar({
     }),
     className: "pill",
     style: {
-      color: "#7dd3fc",
-      borderColor: "#38bdf855"
+      color: "#828fff",
+      borderColor: "#828fff55"
     }
   }, "+30 s"), React.createElement("button", {
     onClick: () => setRest(null),
@@ -1653,8 +1659,12 @@ function TodayTab({
     }
   }, React.createElement("div", {
     style: {
-      fontSize: 14,
-      color: "#a8a8b0"
+      fontSize: 13.5,
+      color: "#d0d6e0",
+      minWidth: 0,
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis"
     }
   }, cap(now.toLocaleDateString("nl-NL", {
     weekday: "long",
@@ -1669,8 +1679,8 @@ function TodayTab({
     onClick: () => setShowWeeks(true),
     className: "pill",
     style: streak > 0 ? {
-      color: "#fb923c",
-      borderColor: "#fb923c55"
+      color: ACC_T,
+      borderColor: ACC + "55"
     } : {}
   }, React.createElement(I, {
     n: "flame",
@@ -1695,16 +1705,16 @@ function TodayTab({
     style: {
       marginBottom: 12,
       padding: "10px 13px",
-      borderRadius: 12,
-      background: "#121215",
-      border: "1px solid #222228",
+      borderRadius: 8,
+      background: "#0f1011",
+      border: "1px solid #23252a",
       fontSize: 13.5,
       lineHeight: 1.5,
-      color: "#c4c4cc"
+      color: "#d0d6e0"
     }
   }, week.tag && React.createElement("span", {
     style: {
-      color: week.goal ? "#fbbf24" : RUN_COLOR,
+      color: week.goal ? "#d6b46a" : RUN_COLOR,
       fontWeight: 600
     }
   }, week.tag, week.note ? ". " : ""), week.note || ""), runsToday.map(run => React.createElement(RunCard, {
@@ -1759,12 +1769,22 @@ function TodayTab({
   }, React.createElement("div", null, React.createElement("div", {
     className: "syne",
     style: {
-      fontSize: 32,
-      color: col,
-      lineHeight: 1.05,
-      letterSpacing: "-1px"
+      fontSize: 30,
+      lineHeight: 1.1,
+      letterSpacing: "-0.8px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10
     }
-  }, day), React.createElement("div", {
+  }, React.createElement("span", {
+    style: {
+      width: 10,
+      height: 10,
+      borderRadius: "50%",
+      background: col,
+      flexShrink: 0
+    }
+  }), day), React.createElement("div", {
     className: "muted",
     style: {
       fontSize: 13.5,
@@ -1792,7 +1812,7 @@ function TodayTab({
   }), "Geen gym"))), off && React.createElement("div", {
     style: {
       fontSize: 13,
-      color: "#fb923c",
+      color: "#d9a066",
       marginTop: 10
     }
   }, "Volgens je loopschema train je vandaag niet: ", off.tag ? off.tag.toLowerCase() : "rustweek", "."), showDays && React.createElement("div", {
@@ -1810,18 +1830,17 @@ function TodayTab({
     style: {
       flex: 1,
       padding: "8px 2px",
-      borderRadius: 10,
+      borderRadius: 8,
       fontSize: 12.5,
       fontWeight: 600,
-      background: i === splitIdx ? DAY_COLORS[i] + "20" : "#17171b",
-      border: `1px solid ${i === splitIdx ? DAY_COLORS[i] + "70" : "#26262d"}`,
-      color: i === splitIdx ? DAY_COLORS[i] : "#a8a8b0"
+      background: i === splitIdx ? ACC + "26" : "#141516",
+      border: `1px solid ${i === splitIdx ? ACC : "#23252a"}`,
+      color: i === splitIdx ? "#f7f8f8" : "#d0d6e0"
     }
   }, d))), React.createElement("button", {
     onClick: () => onStart(splitIdx, (firstOpen || exs[0])?.id),
     className: "btn-primary",
     style: {
-      background: col,
       marginTop: 14,
       display: "flex",
       alignItems: "center",
@@ -1831,7 +1850,7 @@ function TodayTab({
   }, React.createElement(I, {
     n: "play",
     s: 16,
-    c: "#0a0a0c"
+    c: "#ffffff"
   }), doneCount === 0 ? "Start training" : doneCount < exs.length ? `Verder met training (${doneCount}/${exs.length})` : "Training bekijken"), React.createElement("div", {
     style: {
       marginTop: 10
@@ -1856,13 +1875,13 @@ function TodayTab({
       className: "syne",
       style: {
         fontSize: 15,
-        color: d ? "#8b8b95" : "#e8e8e8",
+        color: d ? "#8a8f98" : "#f7f8f8",
         textDecoration: d ? "line-through" : "none"
       }
     }, ex.name), React.createElement("div", {
       style: {
         fontSize: 13,
-        color: tSets ? col : "#8b8b95",
+        color: tSets ? ACC_T : "#8a8f98",
         marginTop: 2,
         whiteSpace: "nowrap",
         overflow: "hidden",
@@ -1870,7 +1889,6 @@ function TodayTab({
       }
     }, sub)), React.createElement(Check, {
       on: d,
-      color: col,
       label: `${ex.name} afvinken`,
       onClick: () => setExDone(p => ({
         ...p,
@@ -1939,7 +1957,7 @@ function TodayTab({
   }, "Toch trainen")), React.createElement("div", {
     style: {
       fontSize: 14,
-      color: "#c4c4cc",
+      color: "#d0d6e0",
       fontStyle: "italic",
       lineHeight: 1.6,
       marginTop: 16
@@ -1958,7 +1976,7 @@ function TodayTab({
   }, "Supplementen"), React.createElement("div", {
     style: {
       fontSize: 12.5,
-      color: suppCount === SUPPLEMENTS.length ? "#a3e635" : "#8b8b95"
+      color: suppCount === SUPPLEMENTS.length ? "#828fff" : "#8a8f98"
     }
   }, suppCount, "/", SUPPLEMENTS.length)), React.createElement("div", {
     style: {
@@ -1979,9 +1997,9 @@ function TodayTab({
         padding: "9px 13px",
         fontSize: 13.5,
         ...(d ? {
-          color: "#a3e635",
-          borderColor: "#a3e63570",
-          background: "#a3e63512"
+          color: "#828fff",
+          borderColor: "#828fff70",
+          background: "#828fff12"
         } : {})
       }
     }, d && React.createElement(I, {
@@ -1990,7 +2008,7 @@ function TodayTab({
       w: 3
     }), s.label, React.createElement("span", {
       style: {
-        color: d ? "#a3e635aa" : "#6b6b75",
+        color: d ? "#828fffaa" : "#62666d",
         fontSize: 12
       }
     }, s.dose));
@@ -2067,7 +2085,7 @@ function WeekStrip({
     const allDone = (x.gi === undefined || gymDone) && runsDone;
     const isT = x.k === tk,
       past = x.k < tk;
-    const c = x.gi !== undefined ? DAY_COLORS[x.gi] : x.runs.some(isSpecial) ? "#fbbf24" : RUN_COLOR;
+    const c = x.gi !== undefined ? DAY_COLORS[x.gi] : x.runs.some(isSpecial) ? "#d6b46a" : RUN_COLOR;
     const main = x.gi !== undefined ? DAYS[x.gi] : runShort(x.runs[0]);
     const status = allDone ? "gedaan" : past ? "gemist" : isT ? "vandaag" : "gepland";
     const runDone = x.runs.length && runsDone;
@@ -2077,21 +2095,21 @@ function WeekStrip({
         flex: 1,
         minWidth: 0,
         padding: "7px 3px",
-        borderRadius: 12,
-        background: allDone ? c + "16" : "transparent",
-        border: `1px solid ${isT ? c : allDone ? c + "40" : "#26262d"}`,
+        borderRadius: 8,
+        background: allDone ? ACC + "1f" : "transparent",
+        border: `1px solid ${isT ? ACC : allDone ? ACC + "55" : "#23252a"}`,
         textAlign: "center"
       }
     }, React.createElement("div", {
       style: {
         fontSize: 11.5,
-        color: isT || allDone ? c : "#8b8b95"
+        color: isT ? ACC_T : "#8a8f98"
       }
     }, DOW[(x.d.getDay() + 6) % 7], " ", x.d.getDate()), React.createElement("div", {
       className: "syne",
       style: {
         fontSize: 13,
-        color: isT || allDone ? c : "#e8e8e8",
+        color: c,
         marginTop: 1,
         whiteSpace: "nowrap",
         overflow: "hidden",
@@ -2101,7 +2119,7 @@ function WeekStrip({
       style: {
         fontSize: 11,
         marginTop: 1,
-        color: runDone ? RUN_COLOR : past ? "#f87171" : "#8b8b95",
+        color: runDone ? RUN_COLOR : past ? "#e5787a" : "#8a8f98",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -2114,7 +2132,7 @@ function WeekStrip({
       style: {
         fontSize: 11,
         marginTop: 1,
-        color: allDone ? c : past ? "#f87171" : "#6b6b75"
+        color: allDone ? ACC_T : past ? "#e5787a" : "#62666d"
       }
     }, status));
   }));
@@ -2131,7 +2149,7 @@ function RunCard({
   const st = runStatus(run, tk);
   const moved = runDate(run) !== run.date;
   const special = isSpecial(run);
-  const c = special ? "#fbbf24" : RUN_COLOR;
+  const c = special ? "#d6b46a" : RUN_COLOR;
   const sum = runSummary(l);
   function quickDone() {
     lsSet("pf_run_" + run.id, {
@@ -2147,10 +2165,7 @@ function RunCard({
     onChange();
   }
   return React.createElement("div", {
-    className: "card",
-    style: {
-      borderColor: c + "55"
-    }
+    className: "card"
   }, React.createElement("div", {
     style: {
       display: "flex",
@@ -2211,9 +2226,9 @@ function RunCard({
       width: "100%",
       marginTop: 12,
       padding: "10px 12px",
-      borderRadius: 12,
-      background: c + "14",
-      border: `1px solid ${c}45`,
+      borderRadius: 8,
+      background: ACC + "14",
+      border: `1px solid ${ACC}45`,
       display: "flex",
       alignItems: "center",
       gap: 10,
@@ -2224,7 +2239,7 @@ function RunCard({
       width: 26,
       height: 26,
       borderRadius: "50%",
-      background: c,
+      background: ACC,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -2233,7 +2248,7 @@ function RunCard({
   }, React.createElement(I, {
     n: "check",
     s: 15,
-    c: "#0a0a0c",
+    c: "#ffffff",
     w: 3
   })), React.createElement("span", {
     style: {
@@ -2249,13 +2264,13 @@ function RunCard({
     style: {
       display: "block",
       fontSize: 12.5,
-      color: special ? "#fde68a" : "#99f6e4",
+      color: "#d0d6e0",
       marginTop: 1
     }
   }, sum.sub)), React.createElement(I, {
     n: "edit",
     s: 15,
-    c: "#8b8b95"
+    c: "#8a8f98"
   })) : st === "skipped" ? React.createElement("div", {
     style: {
       display: "flex",
@@ -2284,7 +2299,6 @@ function RunCard({
     style: {
       flex: 2,
       height: 46,
-      background: c,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -2293,7 +2307,7 @@ function RunCard({
   }, React.createElement(I, {
     n: "check",
     s: 16,
-    c: "#0a0a0c",
+    c: "#ffffff",
     w: 3
   }), "Gedaan"), React.createElement("button", {
     onClick: () => onSheet("log"),
@@ -2326,7 +2340,6 @@ function RunLogSheet({
   const [feel, setFeel] = useState(l.feel || null);
   const [note, setNote] = useState(l.note || "");
   const [err, setErr] = useState("");
-  const c = isSpecial(run) ? "#fbbf24" : RUN_COLOR;
   function save() {
     const o = {
       done: true,
@@ -2430,9 +2443,9 @@ function RunLogSheet({
       padding: "8px 14px",
       fontSize: 13.5,
       ...(feel === f ? {
-        background: "#e8e8e8",
-        color: "#0a0a0c",
-        borderColor: "#e8e8e8"
+        background: "#f7f8f8",
+        color: "#010102",
+        borderColor: "#f7f8f8"
       } : {})
     }
   }, cap(f)))), React.createElement("input", {
@@ -2447,14 +2460,13 @@ function RunLogSheet({
   }), err && React.createElement("div", {
     style: {
       fontSize: 13,
-      color: "#f87171",
+      color: "#e5787a",
       marginTop: 10
     }
   }, err), React.createElement("button", {
     onClick: save,
     className: "btn-primary",
     style: {
-      background: c,
       marginTop: 14
     }
   }, "Opslaan"), (l.done || l.skipped) && React.createElement("button", {
@@ -2541,12 +2553,12 @@ function MoveSheet({
       style: {
         fontSize: 15,
         fontWeight: 600,
-        color: isCur ? RUN_COLOR : "#e8e8e8"
+        color: isCur ? RUN_COLOR : "#f7f8f8"
       }
     }, cap(fmtDayLong(k))), React.createElement("div", {
       style: {
         fontSize: 12.5,
-        color: !b && near(k) ? "#fb923c" : "#8b8b95"
+        color: !b && near(k) ? "#d9a066" : "#8a8f98"
       }
     }, b ? "daar staat al een run" : k === run.date ? "oorspronkelijke dag" : near(k) ? "let op: dan loop je twee dagen achter elkaar" : k < tk ? "al geweest, alleen om in te vullen" : "")), isCur && React.createElement(I, {
       n: "check",
@@ -2592,7 +2604,7 @@ function HelpSheet({
   }, t), React.createElement("div", {
     style: {
       fontSize: 14,
-      color: "#c4c4cc",
+      color: "#d0d6e0",
       lineHeight: 1.55
     }
   }, d))));
@@ -2618,13 +2630,13 @@ function RunPlanView({
     if (st === "done") return React.createElement(I, {
       n: "check",
       s: 17,
-      c: isSpecial(run) ? "#fbbf24" : RUN_COLOR,
+      c: isSpecial(run) ? "#d6b46a" : RUN_COLOR,
       w: 3
     });
     if (st === "missed") return React.createElement("span", {
       style: {
         fontSize: 12,
-        color: "#f87171"
+        color: "#e5787a"
       }
     }, "gemist");
     if (st === "skipped") return React.createElement("span", {
@@ -2636,7 +2648,7 @@ function RunPlanView({
     if (st === "today") return React.createElement("span", {
       style: {
         fontSize: 12,
-        color: RUN_COLOR
+        color: ACC_T
       }
     }, "vandaag");
     return null;
@@ -2699,7 +2711,7 @@ function RunPlanView({
     }, P.when), React.createElement("div", {
       style: {
         fontSize: 14,
-        color: "#c4c4cc",
+        color: "#d0d6e0",
         lineHeight: 1.5,
         margin: "6px 0 10px"
       }
@@ -2717,7 +2729,7 @@ function RunPlanView({
         style: {
           padding: "12px 14px",
           marginBottom: 8,
-          borderColor: isCur ? RUN_COLOR + "90" : undefined,
+          borderColor: isCur ? ACC + "90" : undefined,
           opacity: past ? .78 : 1
         }
       }, React.createElement("div", {
@@ -2733,16 +2745,16 @@ function RunPlanView({
         style: {
           fontSize: 15
         }
-      }, fmtDate(w.s), " \u2013 ", fmtDate(localKey(en))), isCur && React.createElement("span", {
+      }, fmtDate(w.s), " – ", fmtDate(localKey(en))), isCur && React.createElement("span", {
         style: {
           fontSize: 12.5,
-          color: RUN_COLOR,
+          color: ACC_T,
           fontWeight: 600
         }
       }, "deze week"), w.tag && React.createElement("span", {
         style: {
           fontSize: 12.5,
-          color: w.goal ? "#fbbf24" : "#8b8b95",
+          color: w.goal ? "#d6b46a" : "#8a8f98",
           fontWeight: w.goal ? 600 : 400
         }
       }, w.tag)), runs.map(r => React.createElement("button", {
@@ -2771,7 +2783,7 @@ function RunPlanView({
         style: {
           fontSize: 14,
           lineHeight: 1.45,
-          color: isSpecial(r) ? "#fbbf24" : r.kind === "off" ? "#8b8b95" : "#e8e8e8",
+          color: isSpecial(r) ? "#d6b46a" : r.kind === "off" ? "#8a8f98" : "#f7f8f8",
           fontWeight: isSpecial(r) ? 600 : 400
         }
       }, r.text, runDate(r) !== r.date && React.createElement("span", {
@@ -2826,7 +2838,7 @@ function RunPlanView({
     style: {
       fontSize: 14,
       lineHeight: 1.5,
-      color: i === MARATHON.length - 1 ? "#fbbf24" : "#e8e8e8"
+      color: i === MARATHON.length - 1 ? "#d6b46a" : "#f7f8f8"
     }
   }, t))))), sheet && sheet.type === "log" && React.createElement(RunLogSheet, {
     run: sheet.run,
@@ -2876,7 +2888,6 @@ function RunningCard({
     className: "syne",
     style: {
       fontSize: 30,
-      color: RUN_COLOR,
       marginTop: 4
     }
   }, fmtNum(cur.toFixed(1)), " km"), React.createElement("div", {
@@ -2886,11 +2897,7 @@ function RunningCard({
     }
   }, done, "/", thisWeek.length, " runs gedaan")), React.createElement("button", {
     onClick: onSchema,
-    className: "pill",
-    style: {
-      color: RUN_COLOR,
-      borderColor: RUN_COLOR + "55"
-    }
+    className: "pill"
   }, React.createElement(I, {
     n: "map",
     s: 13
@@ -2916,17 +2923,17 @@ function RunningCard({
       width: "100%",
       height: x.km ? 8 + x.km / mx * 36 : 4,
       borderRadius: 6,
-      background: i === 7 ? RUN_COLOR : x.km ? RUN_COLOR + "55" : "#26262d"
+      background: i === 7 ? ACC : x.km ? ACC + "55" : "#23252a"
     }
   }), React.createElement("div", {
     style: {
       fontSize: 10.5,
-      color: "#8b8b95"
+      color: "#8a8f98"
     }
   }, x.w.getDate(), "/", x.w.getMonth() + 1)))), goals.length > 0 && React.createElement("div", {
     style: {
       fontSize: 13.5,
-      color: "#c4c4cc",
+      color: "#d0d6e0",
       marginTop: 12
     }
   }, goals.map(g => `Nog ${g.days} dagen tot ${g.l}.`).join(" ")));
@@ -3169,12 +3176,11 @@ function TrainingMode({
     }, React.createElement(I, {
       n: "trophy",
       s: 34,
-      c: col
+      c: ACC_T
     })), React.createElement("div", {
       className: "syne",
       style: {
-        fontSize: 28,
-        color: col
+        fontSize: 28
       }
     }, nDone === tIds.length ? "Training klaar" : "Training afgerond"), React.createElement("div", {
       className: "muted",
@@ -3192,9 +3198,9 @@ function TrainingMode({
     }, [["Sets", sets], ["Volume", `${Math.round(vol).toLocaleString("nl-NL")} kg`], ["PR's", prs]].map(([l, v]) => React.createElement("div", {
       key: l,
       style: {
-        background: "#0e0e11",
-        border: "1px solid #222228",
-        borderRadius: 14,
+        background: "#141516",
+        border: "1px solid #23252a",
+        borderRadius: 12,
         padding: "12px 6px"
       }
     }, React.createElement("div", {
@@ -3212,7 +3218,6 @@ function TrainingMode({
       onClick: onExit,
       className: "btn-primary",
       style: {
-        background: col,
         marginTop: 20
       }
     }, "Terug naar vandaag"), nDone < tIds.length && React.createElement("button", {
@@ -3247,6 +3252,13 @@ function TrainingMode({
   }, React.createElement(I, {
     n: "left",
     s: 18
+  }), React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: "50%",
+      background: col
+    }
   }), day), React.createElement("button", {
     onClick: () => setSheet("list"),
     className: "pill",
@@ -3269,7 +3281,7 @@ function TrainingMode({
       flex: 1,
       height: 5,
       borderRadius: 3,
-      background: done[id] ? col : id === ex.id ? col + "88" : "#26262d"
+      background: done[id] ? ACC : id === ex.id ? ACC + "88" : "#23252a"
     }
   }))), React.createElement("div", {
     style: {
@@ -3312,23 +3324,23 @@ function TrainingMode({
       gap: 7,
       marginTop: 10,
       fontSize: 13.5,
-      color: exNote ? "#e8e8e8" : "#8b8b95",
+      color: exNote ? "#f7f8f8" : "#8a8f98",
       textAlign: "left"
     }
   }, React.createElement(I, {
     n: "edit",
     s: 14,
-    c: exNote ? col : "#8b8b95"
+    c: exNote ? ACC_T : "#8a8f98"
   }), exNote || "Notitie toevoegen, zoals een stoelstand"), React.createElement("div", {
     style: {
       marginTop: 12,
       padding: "11px 13px",
-      borderRadius: 12,
-      background: hint.up ? col + "14" : "#121215",
-      border: `1px solid ${hint.up ? col + "45" : "#222228"}`,
+      borderRadius: 8,
+      background: hint.up ? ACC + "14" : "#0f1011",
+      border: `1px solid ${hint.up ? ACC + "45" : "#23252a"}`,
       fontSize: 13.5,
       lineHeight: 1.5,
-      color: hint.up ? "#e8e8e8" : "#c4c4cc"
+      color: hint.up ? "#f7f8f8" : "#d0d6e0"
     }
   }, hint.text), React.createElement("div", {
     style: {
@@ -3340,7 +3352,7 @@ function TrainingMode({
       gridTemplateColumns: "22px minmax(0,1fr) minmax(0,1fr) 44px",
       gap: 8,
       fontSize: 12,
-      color: "#8b8b95",
+      color: "#8a8f98",
       marginBottom: 6,
       paddingLeft: 2
     }
@@ -3364,7 +3376,7 @@ function TrainingMode({
   }, React.createElement("span", {
     style: {
       fontSize: 14,
-      color: r.done ? col : "#8b8b95",
+      color: r.done ? ACC_T : "#8a8f98",
       textAlign: "center"
     }
   }, i + 1), React.createElement("input", {
@@ -3376,9 +3388,9 @@ function TrainingMode({
     placeholder: "kg",
     className: "inp set-inp",
     style: r.done ? {
-      color: col,
-      borderColor: col + "40",
-      background: col + "0c"
+      color: ACC_T,
+      borderColor: ACC + "55",
+      background: ACC + "14"
     } : {}
   }), React.createElement("input", {
     type: "number",
@@ -3389,9 +3401,9 @@ function TrainingMode({
     placeholder: "reps",
     className: "inp set-inp",
     style: r.done ? {
-      color: col,
-      borderColor: col + "40",
-      background: col + "0c"
+      color: ACC_T,
+      borderColor: ACC + "55",
+      background: ACC + "14"
     } : {}
   }), React.createElement("div", {
     style: {
@@ -3400,7 +3412,6 @@ function TrainingMode({
     }
   }, React.createElement(Check, {
     on: r.done,
-    color: col,
     size: 38,
     label: `Set ${i + 1} ${r.done ? "terugzetten" : "afvinken"}`,
     onClick: () => toggleSet(i)
@@ -3459,9 +3470,9 @@ function TrainingMode({
     style: {
       flex: 2,
       height: 50,
-      borderRadius: 14,
-      border: `1.5px solid ${col}`,
-      color: col,
+      borderRadius: 8,
+      border: `1px solid ${ACC}`,
+      color: ACC_T,
       fontSize: 15,
       fontWeight: 600,
       display: "flex",
@@ -3481,7 +3492,7 @@ function TrainingMode({
     }
   }, doneSets, "/", target.sets, " sets gedaan"), React.createElement(ExerciseHistory, {
     ex: ex,
-    col: col,
+    col: ACC,
     open: showHist,
     setOpen: setShowHist
   }), toast && React.createElement("div", {
@@ -3490,11 +3501,11 @@ function TrainingMode({
       left: "50%",
       transform: "translateX(-50%)",
       top: "max(20px,env(safe-area-inset-top))",
-      background: "#1c1c21",
-      border: `1px solid ${col}66`,
-      color: "#e8e8e8",
+      background: "#18191a",
+      border: "1px solid #34343a",
+      color: "#f7f8f8",
       padding: "10px 16px",
-      borderRadius: 12,
+      borderRadius: 8,
       fontSize: 14,
       zIndex: 500,
       whiteSpace: "nowrap"
@@ -3521,7 +3532,7 @@ function TrainingMode({
       style: {
         width: 20,
         fontSize: 13,
-        color: "#8b8b95"
+        color: "#8a8f98"
       }
     }, i + 1), React.createElement("div", {
       style: {
@@ -3532,7 +3543,7 @@ function TrainingMode({
       className: "syne",
       style: {
         fontSize: 15,
-        color: id === ex.id ? col : "#e8e8e8"
+        color: id === ex.id ? ACC_T : "#f7f8f8"
       }
     }, e.name), React.createElement("div", {
       className: "muted",
@@ -3542,7 +3553,7 @@ function TrainingMode({
     }, s ? `${s.length}/${t.sets} sets` : `doel ${t.label}`)), done[id] && React.createElement(I, {
       n: "check",
       s: 18,
-      c: col,
+      c: ACC_T,
       w: 3
     }));
   }), React.createElement("button", {
@@ -3558,12 +3569,11 @@ function TrainingMode({
     ex: ex,
     ids: ids,
     day: day,
-    col: col,
+    col: ACC,
     onClose: () => setSheet(null),
     onPick: doSwap
   }), sheet === "note" && React.createElement(NoteSheet, {
     ex: ex,
-    col: col,
     onClose: () => {
       setSheet(null);
       force(x => x + 1);
@@ -3606,7 +3616,7 @@ function ExerciseHistory({
   }, pr > 0 && React.createElement("span", {
     style: {
       fontSize: 13,
-      color: "#fbbf24"
+      color: "#d6b46a"
     }
   }, "PR ", fmtNum(pr), " kg"), React.createElement(Sparkline, {
     data: spark,
@@ -3616,7 +3626,7 @@ function ExerciseHistory({
   }), React.createElement("span", {
     style: {
       transform: open ? "rotate(180deg)" : "none",
-      color: "#8b8b95"
+      color: "#8a8f98"
     }
   }, React.createElement(I, {
     n: "down",
@@ -3714,7 +3724,7 @@ function SwapSheet({
   }, e.detail || e.muscle, e.custom ? ", eigen oefening" : "")), React.createElement(I, {
     n: "swap",
     s: 16,
-    c: "#8b8b95"
+    c: "#8a8f98"
   }));
   return React.createElement(Sheet, {
     onClose: onClose,
@@ -3731,12 +3741,12 @@ function SwapSheet({
     style: {
       flex: 1,
       padding: "9px 6px",
-      borderRadius: 10,
+      borderRadius: 8,
       fontSize: 13,
       fontWeight: 600,
-      border: `1px solid ${permanent === v ? col + "80" : "#26262d"}`,
+      border: `1px solid ${permanent === v ? col + "80" : "#23252a"}`,
       background: permanent === v ? col + "18" : "transparent",
-      color: permanent === v ? col : "#a8a8b0"
+      color: permanent === v ? "#f7f8f8" : "#d0d6e0"
     }
   }, l))), React.createElement("div", {
     className: "lbl",
@@ -3789,20 +3799,16 @@ function SwapSheet({
   }, m))), err && React.createElement("div", {
     style: {
       fontSize: 13,
-      color: "#f87171",
+      color: "#e5787a",
       marginBottom: 8
     }
   }, err), React.createElement("button", {
     onClick: addNew,
-    className: "btn-primary",
-    style: {
-      background: col
-    }
+    className: "btn-primary"
   }, "Toevoegen en wisselen"));
 }
 function NoteSheet({
   ex,
-  col,
   onClose
 }) {
   const [text, setText] = useState(() => getExNote(ex.name));
@@ -3835,10 +3841,7 @@ function NoteSheet({
     }
   }, "Deze notitie zie je elke keer bij ", ex.name, ", ook op andere trainingsdagen."), React.createElement("button", {
     onClick: save,
-    className: "btn-primary",
-    style: {
-      background: col
-    }
+    className: "btn-primary"
   }, "Opslaan"));
 }
 function ProgressTab({
@@ -3903,7 +3906,6 @@ function ProgressTab({
     className: "syne",
     style: {
       fontSize: 30,
-      color: "#38bdf8",
       marginTop: 4
     }
   }, fmtNum(cur.avg.toFixed(1)), " kg"), React.createElement("div", {
@@ -3919,11 +3921,7 @@ function ProgressTab({
     }
   }, "Nog geen wegingen.")), React.createElement("button", {
     onClick: () => setShowBW(true),
-    className: "pill",
-    style: {
-      color: "#38bdf8",
-      borderColor: "#38bdf855"
-    }
+    className: "pill"
   }, React.createElement(I, {
     n: "plus",
     s: 14
@@ -3951,12 +3949,12 @@ function ProgressTab({
         width: "100%",
         height: h,
         borderRadius: 6,
-        background: i === weeks.length - 1 ? "#38bdf8" : "#38bdf840"
+        background: i === weeks.length - 1 ? ACC : ACC + "40"
       }
     }), React.createElement("div", {
       style: {
         fontSize: 10.5,
-        color: "#8b8b95"
+        color: "#8a8f98"
       }
     }, fmtDate(w.week).replace(".", "")));
   }))), React.createElement("div", {
@@ -3988,18 +3986,18 @@ function ProgressTab({
     }, React.createElement("div", {
       style: {
         fontSize: 13.5,
-        color: "#c4c4cc",
+        color: "#d0d6e0",
         textTransform: "capitalize"
       }
     }, m), React.createElement("div", {
       style: {
         fontSize: 12.5,
-        color: p >= 1 ? c : "#8b8b95"
+        color: p >= 1 ? c : "#8a8f98"
       }
     }, sets, "/", target)), React.createElement("div", {
       style: {
         height: 4,
-        background: "#1f1f25",
+        background: "#23252a",
         borderRadius: 2
       }
     }, React.createElement("div", {
@@ -4037,9 +4035,20 @@ function ProgressTab({
   }, React.createElement("div", {
     className: "syne",
     style: {
-      fontSize: 14.5
+      fontSize: 14.5,
+      display: "flex",
+      alignItems: "center",
+      gap: 8
     }
-  }, ex.name), ex.lastDate && React.createElement("div", {
+  }, React.createElement("span", {
+    style: {
+      width: 7,
+      height: 7,
+      borderRadius: "50%",
+      background: MUSCLE_COLORS[ex.muscle] || "#8a8f98",
+      flexShrink: 0
+    }
+  }), ex.name), ex.lastDate && React.createElement("div", {
     className: "muted",
     style: {
       fontSize: 12.5
@@ -4047,8 +4056,7 @@ function ProgressTab({
   }, "laatst ", fmtDate(ex.lastDate))), React.createElement("div", {
     className: "syne",
     style: {
-      fontSize: 16,
-      color: MUSCLE_COLORS[ex.muscle] || "#e8e8e8"
+      fontSize: 16
     }
   }, fmtNum(ex.pr), " kg")))), React.createElement(BackupCard, null), React.createElement("div", {
     className: "muted",
@@ -4058,7 +4066,7 @@ function ProgressTab({
       lineHeight: 1.6,
       marginTop: 4
     }
-  }, "Pim Fit 3.2", React.createElement("br", null), "scherm ", screen.width, "\xD7", screen.height, ", app ", FIT.h, ", boven ", FIT.top, ", onder ", FIT.bottom, ", ", FIT.standalone ? "app-modus" : "browser", FIT.short ? ", korte weergave" : ""), showBW && React.createElement(BWModal, {
+  }, "Pim Fit 3.3", React.createElement("br", null), "scherm ", screen.width, "×", screen.height, ", app ", FIT.h, ", boven ", FIT.top, ", onder ", FIT.bottom, ", ", FIT.standalone ? "app-modus" : "browser", FIT.short ? ", korte weergave" : ""), showBW && React.createElement(BWModal, {
     onClose: () => {
       setShowBW(false);
       setRev(r => r + 1);
@@ -4166,7 +4174,7 @@ function CalendarCard() {
     style: {
       textAlign: "center",
       fontSize: 11.5,
-      color: "#8b8b95"
+      color: "#8a8f98"
     }
   }, d))), React.createElement("div", {
     style: {
@@ -4189,9 +4197,9 @@ function CalendarCard() {
       onClick: () => toggle(ds),
       style: {
         aspectRatio: "1",
-        borderRadius: 9,
-        background: trained ? "#a3e63516" : "#17171b",
-        border: `1px solid ${isToday ? "#a3e635" : trained ? "#a3e63538" : "#222228"}`,
+        borderRadius: 8,
+        background: trained ? "#828fff16" : "#141516",
+        border: `1px solid ${isToday ? "#828fff" : trained ? "#828fff38" : "#23252a"}`,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -4202,7 +4210,7 @@ function CalendarCard() {
     }, React.createElement("div", {
       style: {
         fontSize: 12.5,
-        color: isToday ? "#a3e635" : trained ? "#e8e8e8" : "#8b8b95",
+        color: isToday ? "#828fff" : trained ? "#f7f8f8" : "#8a8f98",
         fontWeight: isToday ? 700 : 400
       }
     }, day), (trained || ran) && React.createElement("div", {
@@ -4216,7 +4224,7 @@ function CalendarCard() {
         width: 4,
         height: 4,
         borderRadius: "50%",
-        background: MUSCLE_COLORS[m] || "#a3e635"
+        background: MUSCLE_COLORS[m] || "#828fff"
       }
     })), ran && React.createElement("div", {
       style: {
@@ -4240,7 +4248,7 @@ function CalendarCard() {
     return n ? `, ${n} ${n === 1 ? "run" : "runs"}` : "";
   })()), React.createElement("div", {
     style: {
-      color: planned && trainedCount >= planned ? "#a3e635" : "#8b8b95"
+      color: planned && trainedCount >= planned ? "#828fff" : "#8a8f98"
     }
   }, planned ? `${Math.min(trainedCount, planned)}/${planned} van je schema` : "nog geen geplande dagen")));
 }
@@ -4352,13 +4360,13 @@ function BackupCard() {
   }, "Back-up"), React.createElement("div", {
     style: {
       fontSize: 13.5,
-      color: "#a8a8b0",
+      color: "#d0d6e0",
       lineHeight: 1.55,
       marginBottom: 12
     }
   }, "Je data staat alleen op deze telefoon. ", last ? React.createElement(React.Fragment, null, "Laatste back-up: ", React.createElement("span", {
     style: {
-      color: age >= 14 ? "#fb923c" : "#e8e8e8"
+      color: age >= 14 ? "#d9a066" : "#f7f8f8"
     }
   }, fmtDate(last)), age >= 14 ? ", tijd voor een nieuwe." : ".") : "Je hebt nog geen back-up gemaakt."), React.createElement("div", {
     style: {
@@ -4369,8 +4377,7 @@ function BackupCard() {
     onClick: exportData,
     className: "btn-primary",
     style: {
-      flex: 1,
-      background: "#a3e635"
+      flex: 1
     }
   }, "Back-up maken"), React.createElement("button", {
     onClick: () => fileRef.current && fileRef.current.click(),
@@ -4436,12 +4443,12 @@ function NotesTab() {
       };
       return {
         text: "getraind",
-        color: "#a3e635"
+        color: "#828fff"
       };
     }
     if (cal[date]) return {
       text: "getraind",
-      color: "#a3e635"
+      color: "#828fff"
     };
     return {
       text: "rustdag",
@@ -4478,7 +4485,7 @@ function NotesTab() {
   }, n.name), React.createElement("div", {
     style: {
       fontSize: 14,
-      color: "#c4c4cc"
+      color: "#d0d6e0"
     }
   }, n.text)))), notes.length === 0 ? React.createElement("div", {
     className: "card"
@@ -4509,23 +4516,23 @@ function NotesTab() {
       className: "syne",
       style: {
         fontSize: 15,
-        color: n.date === today ? "#a3e635" : "#e8e8e8"
+        color: n.date === today ? "#828fff" : "#f7f8f8"
       }
     }, cap(fmtFull(n.date))), React.createElement("div", {
       style: {
         fontSize: 12,
         fontWeight: 600,
-        color: label.color || "#8b8b95",
+        color: label.color || "#8a8f98",
         background: label.color ? label.color + "15" : "transparent",
-        border: `1px solid ${label.color ? label.color + "35" : "#26262d"}`,
+        border: `1px solid ${label.color ? label.color + "35" : "#23252a"}`,
         padding: "3px 9px",
-        borderRadius: 7,
+        borderRadius: 6,
         whiteSpace: "nowrap"
       }
     }, label.text)), React.createElement("div", {
       style: {
         fontSize: 14.5,
-        color: "#c4c4cc",
+        color: "#d0d6e0",
         lineHeight: 1.6,
         whiteSpace: "pre-wrap"
       }
@@ -4536,17 +4543,17 @@ const TABS = [{
   id: "today",
   label: "Vandaag",
   icon: "calendar",
-  color: "#a3e635"
+  color: ACC_T
 }, {
   id: "progress",
   label: "Voortgang",
   icon: "chart",
-  color: "#38bdf8"
+  color: ACC_T
 }, {
   id: "notes",
   label: "Notities",
   icon: "notes",
-  color: "#fb923c"
+  color: ACC_T
 }];
 function App() {
   const [tab, setTab] = useState("today");
@@ -4607,12 +4614,12 @@ function App() {
   }, React.createElement(I, {
     n: t.icon,
     s: 21,
-    c: tab === t.id ? t.color : "#8b8b95"
+    c: tab === t.id ? t.color : "#8a8f98"
   }), React.createElement("div", {
     style: {
       fontSize: 11.5,
       fontWeight: 600,
-      color: tab === t.id ? t.color : "#8b8b95"
+      color: tab === t.id ? t.color : "#8a8f98"
     }
   }, t.label)))));
 }

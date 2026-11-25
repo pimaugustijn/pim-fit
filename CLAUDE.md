@@ -21,9 +21,15 @@ python3 -m http.server 8080
 # then open http://localhost:8080
 ```
 
-**To deploy changes:** after editing `app.jsx`, manually convert JSX to `React.createElement()` calls and update `index.html`. Both files must stay in sync. The comment at the top of `app.jsx` says it is the source; `index.html` is the compiled production version.
+**To deploy changes:** edit `app.jsx`, then regenerate the app script in `index.html`. It is exactly the output of Babel with `@babel/preset-react` (`runtime: "classic"`, `comments: false`) run on `app.jsx`, placed between the `else{` line after the React-load check and the closing `}` before the service-worker `<script>`. Install Babel in a scratch directory (not in the repo, there is no package.json) and splice the output in; never hand-edit the compiled code. CSS lives only in the `<style>` block of `index.html`.
 
 **To force the service worker to fetch a fresh cache** after updating `index.html`, bump `VERSION` in `sw.js`.
+
+## Visual design
+
+Follows Linear's dark design system: canvas `#010102`, cards `#0f1011` with 1px `#23252a` hairlines and 12px radius, inner panels/inputs `#141516` (input border `#34343a`), 8px radius on buttons and small surfaces, Inter 400/500/600 with negative tracking on headings (`.syne` is a legacy class name, now Inter 600). Text: `#f7f8f8`, muted `#d0d6e0`, subtle `#8a8f98`, tertiary `#62666d`.
+
+One accent only: `ACC` (`#5e6ad2`) for fills (primary buttons, checks, progress bars, charts, selected states) and `ACC_T` (`#828fff`) for accent text/icons. `.btn-primary` is lavender by default; don't override its background. `DAY_COLORS`, `MUSCLE_COLORS` and `RUN_COLOR` are muted and appear only as small dots or short labels, never as button fills, large text or card borders. Don't put `font-variant-numeric: tabular-nums` on general text: in Inter it also widens hyphens.
 
 ## Architecture
 
